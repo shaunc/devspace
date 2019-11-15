@@ -1,8 +1,12 @@
 package vars
 
 import (
+	"encoding/json"
+	"fmt"
 	"regexp"
 	"strconv"
+
+	"github.com/devspace-cloud/devspace/pkg/util/log"
 )
 
 // VarMatchRegex is the regex to check if a value matches the devspace var format
@@ -53,4 +57,13 @@ func ParseString(value string, replace ReplaceVarFn) (interface{}, error) {
 	}
 
 	return newValue, nil
+}
+
+// PrintStruct is a helper that prints a struct (or any interface) in JSON format
+func PrintStruct(s interface{}) {
+	data, err := json.Marshal(s)
+	if err != nil {
+		log.Error("[PrintStruct] Error:", err)
+	}
+	fmt.Printf("%s\n", data)
 }
