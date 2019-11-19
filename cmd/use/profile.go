@@ -12,12 +12,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type profileCmd struct {
+// ProfileCmd holds the required data for the down cmd
+type ProfileCmd struct {
 	Reset bool
 }
 
 func newProfileCmd() *cobra.Command {
-	cmd := &profileCmd{}
+	cmd := &ProfileCmd{}
 
 	useProfile := &cobra.Command{
 		Use:   "profile",
@@ -44,7 +45,7 @@ devspace use profile --reset
 }
 
 // RunUseProfile executes the "devspace use config command" logic
-func (cmd *profileCmd) RunUseProfile(cobraCmd *cobra.Command, args []string) error {
+func (cmd *ProfileCmd) RunUseProfile(cobraCmd *cobra.Command, args []string) error {
 	// Set config root
 	configExists, err := configutil.SetDevSpaceRoot(log.GetInstance())
 	if err != nil {

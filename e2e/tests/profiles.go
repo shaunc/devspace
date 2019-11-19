@@ -6,6 +6,7 @@ import (
 
 	"github.com/devspace-cloud/devspace/cmd"
 	"github.com/devspace-cloud/devspace/cmd/flags"
+	"github.com/devspace-cloud/devspace/cmd/use"
 	"github.com/devspace-cloud/devspace/e2e/utils"
 	"github.com/devspace-cloud/devspace/pkg/devspace/config/configutil"
 	"github.com/devspace-cloud/devspace/pkg/devspace/config/generated"
@@ -15,9 +16,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-// RunKustomize runs the test for the kustomize example
-func RunKustomize(namespace string) error {
-	log.Info("Run Kustomize")
+// RunProfiles runs the test for the kustomize example
+func RunProfiles(namespace string) error {
+	log.Info("Run Profiles")
 
 	// We reset the previous config
 	configutil.ResetConfig()
@@ -33,7 +34,7 @@ func RunKustomize(namespace string) error {
 		SkipPush:    true,
 	}
 
-	wd, err := filepath.Abs("../kustomize/")
+	wd, err := filepath.Abs("../examples/profiles/")
 	fmt.Println(wd)
 
 	if err != nil {
@@ -54,6 +55,28 @@ func RunKustomize(namespace string) error {
 	// At last, we delete the current namespace
 	defer utils.DeleteNamespaceAndWait(client, deployConfig.Namespace)
 
+	runProfile(deployConfig, "dev-service1", client, namespace)
+	if err != nil {
+		return err
+	}
+	runProfile(deployConfig, "dev-service2-only", client, namespace)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func runProfile(deployConfig *cmd.DeployCmd, profile string, client kubectl.Client, namespace string) error {
+	var profileConfig = &use.ProfileCmd{
+		Reset: false,
+	}
+
+	err := profileConfig.RunUseProfile(nil, []string{profile})
+	if err != nil {
+		return err
+	}
+
 	err = deployConfig.Run(nil, nil)
 	if err != nil {
 		return err
@@ -61,7 +84,6 @@ func RunKustomize(namespace string) error {
 
 	// Checking if pods are running correctly
 	utils.AnalyzePods(client, namespace)
-	fmt.Println(6)
 
 	// Load generated config
 	generatedConfig, err := generated.LoadConfig(deployConfig.Profile)

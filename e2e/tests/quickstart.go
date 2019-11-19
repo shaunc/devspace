@@ -16,35 +16,40 @@ import (
 
 // RunQuickstart runs the test for the quickstart example
 func RunQuickstart(namespace string) error {
+	log.Info("Run Quickstart")
+
+	// We reset the previous config
+	configutil.ResetConfig()
+	generated.ResetConfig()
+
 	var deployConfig = &cmd.DeployCmd{
 		GlobalFlags: &flags.GlobalFlags{
 			Namespace: namespace,
 			NoWarn:    true,
 		},
-		ForceBuild:  true,
+		// ForceBuild:  true,
 		ForceDeploy: true,
-		SkipPush:    true,
+		// SkipPush:    true,
+	}
+
+	wd, err := filepath.Abs("../examples/quickstart/")
+	if err != nil {
+		return err
+	}
+	utils.ChangeWorkingDir(wd)
+	if err != nil {
+		return err
 	}
 
 	// Create kubectl client
-	client, err := kubectl.NewClientFromContext(deployConfig.KubeContext, deployConfig.Namespace, deployConfig.SwitchContext)
+	var client kubectl.Client
+	client, err = kubectl.NewClientFromContext(deployConfig.KubeContext, deployConfig.Namespace, deployConfig.SwitchContext)
 	if err != nil {
 		return errors.Errorf("Unable to create new kubectl client: %v", err)
 	}
 
 	// At last, we delete the current namespace
 	defer utils.DeleteNamespaceAndWait(client, deployConfig.Namespace)
-
-	var wd string
-	wd, err = filepath.Abs("../examples/quickstart/")
-	if err != nil {
-		return err
-	}
-
-	utils.ChangeWorkingDir(wd)
-	if err != nil {
-		return err
-	}
 
 	err = deployConfig.Run(nil, nil)
 	if err != nil {
