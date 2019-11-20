@@ -6,7 +6,6 @@ import (
 
 	"github.com/devspace-cloud/devspace/cmd"
 	"github.com/devspace-cloud/devspace/cmd/flags"
-	"github.com/devspace-cloud/devspace/cmd/use"
 	"github.com/devspace-cloud/devspace/e2e/utils"
 	"github.com/devspace-cloud/devspace/pkg/devspace/config/configutil"
 	"github.com/devspace-cloud/devspace/pkg/devspace/config/generated"
@@ -14,12 +13,11 @@ import (
 	"github.com/devspace-cloud/devspace/pkg/devspace/services"
 	"github.com/devspace-cloud/devspace/pkg/util/log"
 	"github.com/pkg/errors"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// RunProfiles runs the test for the kustomize example
-func RunProfiles(namespace string) error {
-	log.Info("Run Profiles")
+// RunMicroservices runs the test for the kustomize example
+func RunMicroservices(namespace string) error {
+	log.Info("Run Microservices")
 
 	// We reset the previous config
 	configutil.ResetConfig()
@@ -35,7 +33,7 @@ func RunProfiles(namespace string) error {
 		SkipPush:    true,
 	}
 
-	wd, err := filepath.Abs("../examples/profiles/")
+	wd, err := filepath.Abs("../examples/microservices/")
 	fmt.Println(wd)
 
 	if err != nil {
@@ -56,29 +54,6 @@ func RunProfiles(namespace string) error {
 	// At last, we delete the current namespace
 	defer utils.DeleteNamespaceAndWait(client, deployConfig.Namespace)
 
-	err = runProfile(deployConfig, "dev-service2-only", client, namespace, 2, false)
-	if err != nil {
-		return err
-	}
-
-	err = runProfile(deployConfig, "", client, namespace, 2, true)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func runProfile(deployConfig *cmd.DeployCmd, profile string, client kubectl.Client, namespace string, numberPodsExpected int, reset bool) error {
-	var profileConfig = &use.ProfileCmd{
-		Reset: reset,
-	}
-
-	err := profileConfig.RunUseProfile(nil, []string{profile})
-	if err != nil {
-		return err
-	}
-
 	err = deployConfig.Run(nil, nil)
 	if err != nil {
 		return err
@@ -86,15 +61,7 @@ func runProfile(deployConfig *cmd.DeployCmd, profile string, client kubectl.Clie
 
 	// Checking if pods are running correctly
 	utils.AnalyzePods(client, namespace)
-
-	pods, errp := client.KubeClient().CoreV1().Pods(namespace).List(v1.ListOptions{})
-	if errp != nil {
-		return err
-	}
-	fmt.Println(len(pods.Items))
-	if len(pods.Items) != numberPodsExpected {
-		return errors.Errorf("There should be %v pod(s) running", numberPodsExpected)
-	}
+	fmt.Println(6)
 
 	// Load generated config
 	generatedConfig, err := generated.LoadConfig(deployConfig.Profile)

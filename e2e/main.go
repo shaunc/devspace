@@ -14,6 +14,19 @@ func main() {
 	// err = tests.RunKustomize(testNamespace)
 	// utils.PrintTestResult("Kustomize", err)
 
-	err := tests.RunProfiles(testNamespace)
-	utils.PrintTestResult("Profiles", err)
+	// err := tests.RunProfiles(testNamespace)
+	// utils.PrintTestResult("Profiles", err)
+
+	// err := tests.RunMicroservices(testNamespace)
+	// utils.PrintTestResult("Microservices", err)
+
+	err := tests.RunMinikube(testNamespace)
+	utils.PrintTestResult("Minikube", err)
+
+	// err := tests.RunQuickstartKubectl(testNamespace)
+	// utils.PrintTestResult("Quickstart Kubectl", err)
+
+	// Portforwarding not working
+	// err := tests.RunPhpMysql(testNamespace)
+	// utils.PrintTestResult("Php Mysql", err)
 }
