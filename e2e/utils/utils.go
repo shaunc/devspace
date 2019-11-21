@@ -13,15 +13,22 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/devspace-cloud/devspace/pkg/devspace/analyze"
+	"github.com/devspace-cloud/devspace/pkg/devspace/config/configutil"
+	"github.com/devspace-cloud/devspace/pkg/devspace/config/generated"
 	"github.com/devspace-cloud/devspace/pkg/devspace/kubectl"
 	"github.com/devspace-cloud/devspace/pkg/devspace/services"
 	"github.com/devspace-cloud/devspace/pkg/util/log"
 )
 
 // ChangeWorkingDir changes the working directory
-func ChangeWorkingDir(wd string) error {
+func ChangeWorkingDir(pwd string) error {
+	wd, err := filepath.Abs(pwd)
+	if err != nil {
+		return err
+	}
+
 	// Change working directory
-	err := os.Chdir(wd)
+	err = os.Chdir(wd)
 	if err != nil {
 		return err
 	}
@@ -117,4 +124,24 @@ func PortForwardAndPing(servicesClient services.Client) error {
 	}()
 
 	return nil
+}
+
+// ResetConfigs resets the different configs
+func ResetConfigs() {
+	// We reset the previous config
+	configutil.ResetConfig()
+	generated.ResetConfig()
+}
+
+// Equal tells whether a and b contain the same elements.
+func Equal(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i, v := range a {
+		if v != b[i] {
+			return false
+		}
+	}
+	return true
 }

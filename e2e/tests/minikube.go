@@ -2,7 +2,6 @@ package tests
 
 import (
 	"fmt"
-	"path/filepath"
 
 	"github.com/devspace-cloud/devspace/cmd"
 	"github.com/devspace-cloud/devspace/cmd/flags"
@@ -16,12 +15,10 @@ import (
 )
 
 // RunMinikube runs the test for the kustomize example
-func RunMinikube(namespace string) error {
+func RunMinikube(namespace string, pwd string) error {
 	log.Info("Run Minikube")
 
-	// We reset the previous config
-	configutil.ResetConfig()
-	generated.ResetConfig()
+	utils.ResetConfigs()
 
 	var deployConfig = &cmd.DeployCmd{
 		GlobalFlags: &flags.GlobalFlags{
@@ -33,13 +30,7 @@ func RunMinikube(namespace string) error {
 		SkipPush:    true,
 	}
 
-	wd, err := filepath.Abs("../examples/minikube/")
-	fmt.Println(wd)
-
-	if err != nil {
-		return err
-	}
-	utils.ChangeWorkingDir(wd)
+	err := utils.ChangeWorkingDir(pwd + "/../examples/minikube")
 	if err != nil {
 		return err
 	}

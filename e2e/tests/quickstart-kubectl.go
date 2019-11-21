@@ -1,8 +1,6 @@
 package tests
 
 import (
-	"path/filepath"
-
 	"github.com/devspace-cloud/devspace/cmd"
 	"github.com/devspace-cloud/devspace/cmd/flags"
 	"github.com/devspace-cloud/devspace/e2e/utils"
@@ -15,12 +13,10 @@ import (
 )
 
 // RunQuickstartKubectl runs the test for the quickstart example
-func RunQuickstartKubectl(namespace string) error {
+func RunQuickstartKubectl(namespace string, pwd string) error {
 	log.Info("Run Quickstart Kubectl")
 
-	// We reset the previous config
-	configutil.ResetConfig()
-	generated.ResetConfig()
+	utils.ResetConfigs()
 
 	var deployConfig = &cmd.DeployCmd{
 		GlobalFlags: &flags.GlobalFlags{
@@ -32,11 +28,7 @@ func RunQuickstartKubectl(namespace string) error {
 		// SkipPush:    true,
 	}
 
-	wd, err := filepath.Abs("../examples/quickstart-kubectl/")
-	if err != nil {
-		return err
-	}
-	utils.ChangeWorkingDir(wd)
+	err := utils.ChangeWorkingDir(pwd + "/../examples/quickstart-kubectl")
 	if err != nil {
 		return err
 	}

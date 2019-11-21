@@ -1,8 +1,6 @@
 package tests
 
 import (
-	"path/filepath"
-
 	"github.com/devspace-cloud/devspace/cmd"
 	"github.com/devspace-cloud/devspace/cmd/flags"
 	"github.com/devspace-cloud/devspace/e2e/utils"
@@ -15,12 +13,10 @@ import (
 )
 
 // RunQuickstart runs the test for the quickstart example
-func RunQuickstart(namespace string) error {
+func RunQuickstart(namespace string, pwd string) error {
 	log.Info("Run Quickstart")
 
-	// We reset the previous config
-	configutil.ResetConfig()
-	generated.ResetConfig()
+	utils.ResetConfigs()
 
 	var deployConfig = &cmd.DeployCmd{
 		GlobalFlags: &flags.GlobalFlags{
@@ -32,11 +28,7 @@ func RunQuickstart(namespace string) error {
 		// SkipPush:    true,
 	}
 
-	wd, err := filepath.Abs("../examples/quickstart/")
-	if err != nil {
-		return err
-	}
-	utils.ChangeWorkingDir(wd)
+	err := utils.ChangeWorkingDir(pwd + "/../examples/quickstart")
 	if err != nil {
 		return err
 	}

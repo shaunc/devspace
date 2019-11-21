@@ -2,7 +2,6 @@ package tests
 
 import (
 	"fmt"
-	"path/filepath"
 
 	"github.com/devspace-cloud/devspace/cmd"
 	"github.com/devspace-cloud/devspace/cmd/flags"
@@ -16,12 +15,10 @@ import (
 )
 
 // RunKustomize runs the test for the kustomize example
-func RunKustomize(namespace string) error {
+func RunKustomize(namespace string, pwd string) error {
 	log.Info("Run Kustomize")
 
-	// We reset the previous config
-	configutil.ResetConfig()
-	generated.ResetConfig()
+	utils.ResetConfigs()
 
 	var deployConfig = &cmd.DeployCmd{
 		GlobalFlags: &flags.GlobalFlags{
@@ -33,13 +30,7 @@ func RunKustomize(namespace string) error {
 		SkipPush:    true,
 	}
 
-	wd, err := filepath.Abs("../kustomize/")
-	fmt.Println(wd)
-
-	if err != nil {
-		return err
-	}
-	utils.ChangeWorkingDir(wd)
+	err := utils.ChangeWorkingDir(pwd + "/../examples/kustomize")
 	if err != nil {
 		return err
 	}

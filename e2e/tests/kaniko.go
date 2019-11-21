@@ -1,8 +1,6 @@
 package tests
 
 import (
-	"path/filepath"
-
 	"github.com/devspace-cloud/devspace/cmd"
 	"github.com/devspace-cloud/devspace/cmd/flags"
 	"github.com/devspace-cloud/devspace/e2e/utils"
@@ -15,7 +13,9 @@ import (
 )
 
 // RunKaniko runs the test for the kaniko example
-func RunKaniko(namespace string) error {
+func RunKaniko(namespace string, pwd string) error {
+	utils.ResetConfigs()
+
 	var deployConfig = &cmd.DeployCmd{
 		GlobalFlags: &flags.GlobalFlags{
 			Namespace: namespace,
@@ -37,13 +37,7 @@ func RunKaniko(namespace string) error {
 		utils.DeleteNamespaceAndWait(client, deployConfig.Namespace)
 	}()
 
-	var wd string
-	wd, err = filepath.Abs("../examples/kaniko/")
-	if err != nil {
-		return err
-	}
-
-	utils.ChangeWorkingDir(wd)
+	err = utils.ChangeWorkingDir(pwd + "/../examples/kaniko")
 	if err != nil {
 		return err
 	}

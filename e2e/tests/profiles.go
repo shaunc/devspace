@@ -1,9 +1,6 @@
 package tests
 
 import (
-	"fmt"
-	"path/filepath"
-
 	"github.com/devspace-cloud/devspace/cmd"
 	"github.com/devspace-cloud/devspace/cmd/flags"
 	"github.com/devspace-cloud/devspace/cmd/use"
@@ -18,12 +15,10 @@ import (
 )
 
 // RunProfiles runs the test for the kustomize example
-func RunProfiles(namespace string) error {
+func RunProfiles(namespace string, pwd string) error {
 	log.Info("Run Profiles")
 
-	// We reset the previous config
-	configutil.ResetConfig()
-	generated.ResetConfig()
+	utils.ResetConfigs()
 
 	var deployConfig = &cmd.DeployCmd{
 		GlobalFlags: &flags.GlobalFlags{
@@ -35,13 +30,7 @@ func RunProfiles(namespace string) error {
 		SkipPush:    true,
 	}
 
-	wd, err := filepath.Abs("../examples/profiles/")
-	fmt.Println(wd)
-
-	if err != nil {
-		return err
-	}
-	utils.ChangeWorkingDir(wd)
+	err := utils.ChangeWorkingDir(pwd + "/../examples/profiles")
 	if err != nil {
 		return err
 	}
@@ -56,12 +45,12 @@ func RunProfiles(namespace string) error {
 	// At last, we delete the current namespace
 	defer utils.DeleteNamespaceAndWait(client, deployConfig.Namespace)
 
-	err = runProfile(deployConfig, "dev-service2-only", client, namespace, 2, false)
+	err = runProfile(deployConfig, "dev-service2-only", client, namespace, []string{"service-2"}, false)
 	if err != nil {
 		return err
 	}
 
-	err = runProfile(deployConfig, "", client, namespace, 2, true)
+	err = runProfile(deployConfig, "", client, namespace, []string{"service-1", "service-2"}, true)
 	if err != nil {
 		return err
 	}
@@ -69,9 +58,23 @@ func RunProfiles(namespace string) error {
 	return nil
 }
 
-func runProfile(deployConfig *cmd.DeployCmd, profile string, client kubectl.Client, namespace string, numberPodsExpected int, reset bool) error {
+func runProfile(deployConfig *cmd.DeployCmd, profile string, client kubectl.Client, namespace string, expectedPodLabels []string, reset bool) error {
+	utils.ResetConfigs()
+
 	var profileConfig = &use.ProfileCmd{
 		Reset: reset,
+	}
+
+	if profile == "" {
+		err := profileConfig.RunUseProfile(nil, nil)
+		if err != nil {
+			return err
+		}
+	} else {
+		err := profileConfig.RunUseProfile(nil, []string{profile})
+		if err != nil {
+			return err
+		}
 	}
 
 	err := profileConfig.RunUseProfile(nil, []string{profile})
@@ -91,9 +94,18 @@ func runProfile(deployConfig *cmd.DeployCmd, profile string, client kubectl.Clie
 	if errp != nil {
 		return err
 	}
-	fmt.Println(len(pods.Items))
-	if len(pods.Items) != numberPodsExpected {
-		return errors.Errorf("There should be %v pod(s) running", numberPodsExpected)
+
+	var rp []string
+	for _, x := range expectedPodLabels {
+		for _, y := range pods.Items {
+			if x == y.ObjectMeta.Labels["app.kubernetes.io/component"] {
+				rp = append(rp, x)
+			}
+		}
+	}
+
+	if !utils.Equal(rp, expectedPodLabels) {
+		return errors.New("The expected pods are not running")
 	}
 
 	// Load generated config

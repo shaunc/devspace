@@ -2,7 +2,6 @@ package tests
 
 import (
 	"fmt"
-	"path/filepath"
 
 	"github.com/devspace-cloud/devspace/cmd"
 	"github.com/devspace-cloud/devspace/cmd/flags"
@@ -16,12 +15,10 @@ import (
 )
 
 // RunMicroservices runs the test for the kustomize example
-func RunMicroservices(namespace string) error {
+func RunMicroservices(namespace string, pwd string) error {
 	log.Info("Run Microservices")
 
-	// We reset the previous config
-	configutil.ResetConfig()
-	generated.ResetConfig()
+	utils.ResetConfigs()
 
 	var deployConfig = &cmd.DeployCmd{
 		GlobalFlags: &flags.GlobalFlags{
@@ -33,13 +30,7 @@ func RunMicroservices(namespace string) error {
 		SkipPush:    true,
 	}
 
-	wd, err := filepath.Abs("../examples/microservices/")
-	fmt.Println(wd)
-
-	if err != nil {
-		return err
-	}
-	utils.ChangeWorkingDir(wd)
+	err := utils.ChangeWorkingDir(pwd + "/../examples/microservices")
 	if err != nil {
 		return err
 	}

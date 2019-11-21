@@ -1,8 +1,6 @@
 package tests
 
 import (
-	"path/filepath"
-
 	"github.com/devspace-cloud/devspace/cmd"
 	"github.com/devspace-cloud/devspace/cmd/flags"
 	"github.com/devspace-cloud/devspace/e2e/utils"
@@ -15,12 +13,10 @@ import (
 )
 
 // RunPhpMysql runs the test for the quickstart example
-func RunPhpMysql(namespace string) error {
+func RunPhpMysql(namespace string, pwd string) error {
 	log.Info("Run Quickstart")
 
-	// We reset the previous config
-	configutil.ResetConfig()
-	generated.ResetConfig()
+	utils.ResetConfigs()
 
 	var deployConfig = &cmd.DeployCmd{
 		GlobalFlags: &flags.GlobalFlags{
@@ -32,11 +28,7 @@ func RunPhpMysql(namespace string) error {
 		// SkipPush:    true,
 	}
 
-	wd, err := filepath.Abs("../examples/php-mysql-example/")
-	if err != nil {
-		return err
-	}
-	utils.ChangeWorkingDir(wd)
+	err := utils.ChangeWorkingDir(pwd + "/../examples/php-mysql-example")
 	if err != nil {
 		return err
 	}
