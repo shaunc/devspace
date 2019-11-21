@@ -1,8 +1,6 @@
 package tests
 
 import (
-	"fmt"
-
 	"github.com/devspace-cloud/devspace/cmd"
 	"github.com/devspace-cloud/devspace/cmd/flags"
 	"github.com/devspace-cloud/devspace/e2e/utils"
@@ -52,7 +50,6 @@ func RunMinikube(namespace string, pwd string) error {
 
 	// Checking if pods are running correctly
 	utils.AnalyzePods(client, namespace)
-	fmt.Println(6)
 
 	// Load generated config
 	generatedConfig, err := generated.LoadConfig(deployConfig.Profile)

@@ -14,6 +14,8 @@ import (
 
 // RunKaniko runs the test for the kaniko example
 func RunKaniko(namespace string, pwd string) error {
+	log.Info("Run Kaniko")
+
 	utils.ResetConfigs()
 
 	var deployConfig = &cmd.DeployCmd{
