@@ -1,4 +1,4 @@
-package tests
+package deploy
 
 import (
 	"github.com/devspace-cloud/devspace/cmd"
@@ -12,9 +12,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-// RunKaniko runs the test for the kaniko example
-func RunKaniko(namespace string, pwd string) error {
-	log.Info("Run Kaniko")
+// RunQuickstart runs the test for the quickstart example
+func RunQuickstart(namespace string, pwd string) error {
+	log.Info("Run Quickstart")
 
 	utils.ResetConfigs()
 
@@ -23,26 +23,25 @@ func RunKaniko(namespace string, pwd string) error {
 			Namespace: namespace,
 			NoWarn:    true,
 		},
-		ForceBuild:  true,
+		// ForceBuild:  true,
 		ForceDeploy: true,
-		SkipPush:    true,
+		// SkipPush:    true,
+	}
+
+	err := utils.ChangeWorkingDir(pwd + "/../examples/quickstart")
+	if err != nil {
+		return err
 	}
 
 	// Create kubectl client
-	client, err := kubectl.NewClientFromContext(deployConfig.KubeContext, deployConfig.Namespace, deployConfig.SwitchContext)
+	var client kubectl.Client
+	client, err = kubectl.NewClientFromContext(deployConfig.KubeContext, deployConfig.Namespace, deployConfig.SwitchContext)
 	if err != nil {
 		return errors.Errorf("Unable to create new kubectl client: %v", err)
 	}
 
-	defer func() {
-		// At last, we delete the current namespace
-		utils.DeleteNamespaceAndWait(client, deployConfig.Namespace)
-	}()
-
-	err = utils.ChangeWorkingDir(pwd + "/../examples/kaniko")
-	if err != nil {
-		return err
-	}
+	// At last, we delete the current namespace
+	defer utils.DeleteNamespaceAndWait(client, deployConfig.Namespace)
 
 	err = deployConfig.Run(nil, nil)
 	if err != nil {

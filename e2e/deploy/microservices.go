@@ -1,4 +1,4 @@
-package tests
+package deploy
 
 import (
 	"github.com/devspace-cloud/devspace/cmd"
@@ -12,9 +12,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-// RunQuickstartKubectl runs the test for the quickstart example
-func RunQuickstartKubectl(namespace string, pwd string) error {
-	log.Info("Run Quickstart Kubectl")
+// RunMicroservices runs the test for the kustomize example
+func RunMicroservices(namespace string, pwd string) error {
+	log.Info("Run Microservices")
 
 	utils.ResetConfigs()
 
@@ -23,12 +23,12 @@ func RunQuickstartKubectl(namespace string, pwd string) error {
 			Namespace: namespace,
 			NoWarn:    true,
 		},
-		// ForceBuild:  true,
+		ForceBuild:  true,
 		ForceDeploy: true,
-		// SkipPush:    true,
+		SkipPush:    true,
 	}
 
-	err := utils.ChangeWorkingDir(pwd + "/../examples/quickstart-kubectl")
+	err := utils.ChangeWorkingDir(pwd + "/../examples/microservices")
 	if err != nil {
 		return err
 	}

@@ -1,8 +1,6 @@
-package tests
+package deploy
 
 import (
-	"fmt"
-
 	"github.com/devspace-cloud/devspace/cmd"
 	"github.com/devspace-cloud/devspace/cmd/flags"
 	"github.com/devspace-cloud/devspace/e2e/utils"
@@ -14,9 +12,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-// RunKustomize runs the test for the kustomize example
-func RunKustomize(namespace string, pwd string) error {
-	log.Info("Run Kustomize")
+// RunPhpMysql runs the test for the quickstart example
+func RunPhpMysql(namespace string, pwd string) error {
+	log.Info("Run Quickstart")
 
 	utils.ResetConfigs()
 
@@ -25,12 +23,12 @@ func RunKustomize(namespace string, pwd string) error {
 			Namespace: namespace,
 			NoWarn:    true,
 		},
-		ForceBuild:  true,
+		// ForceBuild:  true,
 		ForceDeploy: true,
-		SkipPush:    true,
+		// SkipPush:    true,
 	}
 
-	err := utils.ChangeWorkingDir(pwd + "/../examples/kustomize")
+	err := utils.ChangeWorkingDir(pwd + "/../examples/php-mysql-example")
 	if err != nil {
 		return err
 	}
@@ -52,7 +50,6 @@ func RunKustomize(namespace string, pwd string) error {
 
 	// Checking if pods are running correctly
 	utils.AnalyzePods(client, namespace)
-	fmt.Println(6)
 
 	// Load generated config
 	generatedConfig, err := generated.LoadConfig(deployConfig.Profile)

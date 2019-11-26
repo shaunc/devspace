@@ -93,7 +93,7 @@ func TestInit(t *testing.T) {
 		},
 		initTestCase{
 			name:    "Init with helm chart",
-			answers: []string{enterHelmChartOption, "someChart"},
+			answers: []string{EnterHelmChartOption, "someChart"},
 			expectedConfig: &latest.Config{
 				Version: latest.Version,
 				Deployments: []*latest.DeploymentConfig{
@@ -114,7 +114,7 @@ func TestInit(t *testing.T) {
 			files: map[string]interface{}{
 				filepath.Join(gitIgnoreFile, "someFile"): "",
 			},
-			answers: []string{enterManifestsOption, "myManifest"},
+			answers: []string{EnterManifestsOption, "myManifest"},
 			expectedConfig: &latest.Config{
 				Version: latest.Version,
 				Deployments: []*latest.DeploymentConfig{
@@ -133,7 +133,7 @@ func TestInit(t *testing.T) {
 			files: map[string]interface{}{
 				gitIgnoreFile: "",
 			},
-			answers: []string{useExistingImageOption, "someImage", "1000", "1234"},
+			answers: []string{UseExistingImageOption, "someImage", "1000", "1234"},
 			expectedConfig: &latest.Config{
 				Version: latest.Version,
 				Images: map[string]*latest.ImageConfig{
@@ -199,7 +199,7 @@ func TestInit(t *testing.T) {
 					Password: "pass",
 				},
 			},
-			answers: []string{enterDockerfileOption, "aDockerfile", "Use hub.docker.com => you are logged in as user"},
+			answers: []string{EnterDockerfileOption, "aDockerfile", "Use hub.docker.com => you are logged in as user"},
 			expectedConfig: &latest.Config{
 				Version: latest.Version,
 				Images: map[string]*latest.ImageConfig{

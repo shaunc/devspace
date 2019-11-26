@@ -1,6 +1,8 @@
 package registry
 
 import (
+	"strings"
+
 	"github.com/pkg/errors"
 
 	"github.com/devspace-cloud/devspace/pkg/util/log"
@@ -82,6 +84,11 @@ func (r *client) addPullSecretsToServiceAccount(pullSecrets []string) error {
 	if changed {
 		_, err := r.kubeClient.KubeClient().CoreV1().ServiceAccounts(r.kubeClient.Namespace()).Update(serviceaccount)
 		if err != nil {
+			if strings.Index(err.Error(), "Operation cannot be fulfilled on serviceaccounts \"default\": the object has been modified; please apply your changes to the latest version and try again") == 0 {
+				r.log.Info("Retry updating service account, because it has changed in the meantime")
+				return r.addPullSecretsToServiceAccount(pullSecrets)
+			}
+
 			return errors.Wrap(err, "update service account")
 		}
 	}

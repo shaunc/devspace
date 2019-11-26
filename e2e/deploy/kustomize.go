@@ -1,4 +1,4 @@
-package tests
+package deploy
 
 import (
 	"github.com/devspace-cloud/devspace/cmd"
@@ -12,9 +12,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-// RunPhpMysql runs the test for the quickstart example
-func RunPhpMysql(namespace string, pwd string) error {
-	log.Info("Run Quickstart")
+// RunKustomize runs the test for the kustomize example
+func RunKustomize(namespace string, pwd string) error {
+	log.Info("Run Kustomize")
 
 	utils.ResetConfigs()
 
@@ -23,12 +23,12 @@ func RunPhpMysql(namespace string, pwd string) error {
 			Namespace: namespace,
 			NoWarn:    true,
 		},
-		// ForceBuild:  true,
+		ForceBuild:  true,
 		ForceDeploy: true,
-		// SkipPush:    true,
+		SkipPush:    true,
 	}
 
-	err := utils.ChangeWorkingDir(pwd + "/../examples/php-mysql-example")
+	err := utils.ChangeWorkingDir(pwd + "/../examples/kustomize")
 	if err != nil {
 		return err
 	}

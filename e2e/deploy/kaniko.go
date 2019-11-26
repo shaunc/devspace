@@ -1,4 +1,4 @@
-package tests
+package deploy
 
 import (
 	"github.com/devspace-cloud/devspace/cmd"
@@ -12,9 +12,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-// RunMinikube runs the test for the kustomize example
-func RunMinikube(namespace string, pwd string) error {
-	log.Info("Run Minikube")
+// RunKaniko runs the test for the kaniko example
+func RunKaniko(namespace string, pwd string) error {
+	log.Info("Run Kaniko")
 
 	utils.ResetConfigs()
 
@@ -28,20 +28,21 @@ func RunMinikube(namespace string, pwd string) error {
 		SkipPush:    true,
 	}
 
-	err := utils.ChangeWorkingDir(pwd + "/../examples/minikube")
-	if err != nil {
-		return err
-	}
-
 	// Create kubectl client
-	var client kubectl.Client
-	client, err = kubectl.NewClientFromContext(deployConfig.KubeContext, deployConfig.Namespace, deployConfig.SwitchContext)
+	client, err := kubectl.NewClientFromContext(deployConfig.KubeContext, deployConfig.Namespace, deployConfig.SwitchContext)
 	if err != nil {
 		return errors.Errorf("Unable to create new kubectl client: %v", err)
 	}
 
-	// At last, we delete the current namespace
-	defer utils.DeleteNamespaceAndWait(client, deployConfig.Namespace)
+	defer func() {
+		// At last, we delete the current namespace
+		utils.DeleteNamespaceAndWait(client, deployConfig.Namespace)
+	}()
+
+	err = utils.ChangeWorkingDir(pwd + "/../examples/kaniko")
+	if err != nil {
+		return err
+	}
 
 	err = deployConfig.Run(nil, nil)
 	if err != nil {

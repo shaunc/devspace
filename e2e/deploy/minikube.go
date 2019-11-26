@@ -1,4 +1,5 @@
-package tests
+package deploy
+
 
 import (
 	"github.com/devspace-cloud/devspace/cmd"
@@ -12,9 +13,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-// RunMicroservices runs the test for the kustomize example
-func RunMicroservices(namespace string, pwd string) error {
-	log.Info("Run Microservices")
+// RunMinikube runs the test for the kustomize example
+func RunMinikube(namespace string, pwd string) error {
+	log.Info("Run Minikube")
 
 	utils.ResetConfigs()
 
@@ -28,7 +29,7 @@ func RunMicroservices(namespace string, pwd string) error {
 		SkipPush:    true,
 	}
 
-	err := utils.ChangeWorkingDir(pwd + "/../examples/microservices")
+	err := utils.ChangeWorkingDir(pwd + "/../examples/minikube")
 	if err != nil {
 		return err
 	}

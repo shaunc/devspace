@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/devspace-cloud/devspace/e2e/tests"
+	"github.com/devspace-cloud/devspace/e2e/deploy"
+	"github.com/devspace-cloud/devspace/e2e/testinit"
 	"github.com/devspace-cloud/devspace/e2e/utils"
 )
 
@@ -17,26 +18,33 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = tests.RunQuickstart(testNamespace, pwd)
+	// deployTest(pwd)
+	testinit.TestInit(testNamespace, pwd)
+}
+
+func deployTest(pwd string) {
+
+	err := deploy.RunQuickstart(testNamespace, pwd)
 	utils.PrintTestResult("Quickstart", err)
 
-	err = tests.RunKustomize(testNamespace, pwd)
+	err = deploy.RunKustomize(testNamespace, pwd)
 	utils.PrintTestResult("Kustomize", err)
 
-	err = tests.RunProfiles(testNamespace, pwd)
+	err = deploy.RunProfiles(testNamespace, pwd)
 	utils.PrintTestResult("Profiles", err)
 
 	// TODO: Need to reset helm client somehow
-	// err = tests.RunMicroservices(testNamespace, pwd)
+	// err = deploy.RunMicroservices(testNamespace, pwd)
 	// utils.PrintTestResult("Microservices", err)
 
 	// TODO: Need to reset helm client somehow
-	// err = tests.RunMinikube(testNamespace, pwd)
+	// err = deploy.RunMinikube(testNamespace, pwd)
 	// utils.PrintTestResult("Minikube", err)
 
-	err = tests.RunQuickstartKubectl(testNamespace, pwd)
+	err = deploy.RunQuickstartKubectl(testNamespace, pwd)
 	utils.PrintTestResult("Quickstart Kubectl", err)
 
-	err = tests.RunPhpMysql(testNamespace, pwd)
-	utils.PrintTestResult("Php Mysql", err)
+	// TODO: Need to reset helm client somehow
+	// err = deploy.RunPhpMysql(testNamespace, pwd)
+	// utils.PrintTestResult("Php Mysql", err)
 }
