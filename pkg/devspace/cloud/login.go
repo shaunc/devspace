@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/devspace-cloud/devspace/pkg/devspace/cloud/config/versions/latest"
 	"github.com/devspace-cloud/devspace/pkg/devspace/cloud/token"
 	"github.com/devspace-cloud/devspace/pkg/util/log"
 	"github.com/devspace-cloud/devspace/pkg/util/survey"
@@ -24,7 +23,7 @@ const LoginSuccessEndpoint = "/login-success"
 const TokenEndpoint = "/auth/token"
 
 // GetToken returns a valid access token to the provider
-func (p *Provider) GetToken() (string, error) {
+func (p *provider) GetToken() (string, error) {
 	if p.Key == "" {
 		return "", errors.New("Provider has no key specified")
 	}
@@ -60,7 +59,7 @@ func (p *Provider) GetToken() (string, error) {
 }
 
 // Login logs the user into DevSpace Cloud
-func (p *Provider) Login(providerConfig *latest.Config) error {
+func (p *provider) Login() error {
 	var (
 		url        = p.Host + LoginEndpoint
 		ctx        = context.Background()
@@ -68,30 +67,30 @@ func (p *Provider) Login(providerConfig *latest.Config) error {
 	)
 	var key string
 
-	server := startServer(p.Host+LoginSuccessEndpoint, keyChannel, p.Log)
+	server := startServer(p.Host+LoginSuccessEndpoint, keyChannel, p.log)
 	err := open.Run(url)
 	if err != nil {
-		p.Log.Infof("Unable to open web browser for login page.\n\n Please follow these instructions for manually loggin in:\n\n  1. Open this URL in a browser: %s\n  2. After logging in, click the 'Create Key' button\n  3. Enter a key name (e.g. my-key) and click 'Create Access Key'\n  4. Copy the generated key from the input field", p.Host+"/settings/access-keys")
+		p.log.Infof("Unable to open web browser for login page.\n\n Please follow these instructions for manually loggin in:\n\n  1. Open this URL in a browser: %s\n  2. After logging in, click the 'Create Key' button\n  3. Enter a key name (e.g. my-key) and click 'Create Access Key'\n  4. Copy the generated key from the input field", p.Host+"/settings/access-keys")
 
-		key, err = survey.Question(&survey.QuestionOptions{
+		key, err = p.log.Question(&survey.QuestionOptions{
 			Question:   "5. Enter the access key here:",
 			IsPassword: true,
-		}, p.Log)
+		})
 		if err != nil {
 			return err
 		}
 
 		key = strings.TrimSpace(key)
 
-		p.Log.WriteString("\n")
-		_, err = GetProviderWithOptions(providerConfig, p.Name, key, true, p.Log)
+		p.log.WriteString("\n")
+		_, err = GetProviderWithOptions(p.Name, key, true, p.loader, p.log)
 		if err != nil {
 			return errors.Wrap(err, "login")
 		}
 	} else {
-		p.Log.Infof("If the browser does not open automatically, please navigate to %s", url)
-		p.Log.StartWait("Logging into cloud provider...")
-		defer p.Log.StopWait()
+		p.log.Infof("If the browser does not open automatically, please navigate to %s", url)
+		p.log.StartWait("Logging into cloud provider...")
+		defer p.log.StopWait()
 
 		key = <-keyChannel
 	}

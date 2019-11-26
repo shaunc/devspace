@@ -1,10 +1,9 @@
 package use
 
 import (
-	"github.com/devspace-cloud/devspace/pkg/devspace/config/configutil"
-	"github.com/devspace-cloud/devspace/pkg/devspace/config/generated"
+	"github.com/devspace-cloud/devspace/pkg/devspace/config/loader"
 
-	"github.com/devspace-cloud/devspace/pkg/util/log"
+	logpkg "github.com/devspace-cloud/devspace/pkg/util/log"
 	"github.com/devspace-cloud/devspace/pkg/util/message"
 	"github.com/devspace-cloud/devspace/pkg/util/survey"
 
@@ -47,7 +46,9 @@ devspace use profile --reset
 // RunUseProfile executes the "devspace use config command" logic
 func (cmd *ProfileCmd) RunUseProfile(cobraCmd *cobra.Command, args []string) error {
 	// Set config root
-	configExists, err := configutil.SetDevSpaceRoot(log.GetInstance())
+	log := logpkg.GetInstance()
+	configLoader := loader.NewConfigLoader(nil, logpkg.Discard)
+	configExists, err := configLoader.SetDevSpaceRoot()
 	if err != nil {
 		return err
 	}
@@ -55,7 +56,7 @@ func (cmd *ProfileCmd) RunUseProfile(cobraCmd *cobra.Command, args []string) err
 		return errors.New(message.ConfigNotFound)
 	}
 
-	profiles, err := configutil.GetProfiles(".")
+	profiles, err := loader.GetProfiles(".")
 	if err != nil {
 		return err
 	}
@@ -65,10 +66,10 @@ func (cmd *ProfileCmd) RunUseProfile(cobraCmd *cobra.Command, args []string) err
 		if len(args) > 0 {
 			profileName = args[0]
 		} else {
-			profileName, err = survey.Question(&survey.QuestionOptions{
+			profileName, err = log.Question(&survey.QuestionOptions{
 				Question: "Please select a profile to use",
 				Options:  profiles,
-			}, log.GetInstance())
+			})
 			if err != nil {
 				return err
 			}
@@ -89,7 +90,7 @@ func (cmd *ProfileCmd) RunUseProfile(cobraCmd *cobra.Command, args []string) err
 	}
 
 	// Load generated config
-	generatedConfig, err := generated.LoadConfig("")
+	generatedConfig, err := configLoader.Generated()
 	if err != nil {
 		return err
 	}
@@ -98,7 +99,7 @@ func (cmd *ProfileCmd) RunUseProfile(cobraCmd *cobra.Command, args []string) err
 	generatedConfig.ActiveProfile = profileName
 
 	// Save generated config
-	err = generated.SaveConfig(generatedConfig)
+	err = configLoader.SaveGenerated(generatedConfig)
 	if err != nil {
 		return err
 	}
