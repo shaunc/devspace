@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
 	"html"
 	"io"
@@ -15,8 +13,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/devspace-cloud/devspace/pkg/devspace/analyze"
-	"github.com/devspace-cloud/devspace/pkg/devspace/config/configutil"
-	"github.com/devspace-cloud/devspace/pkg/devspace/config/generated"
 	"github.com/devspace-cloud/devspace/pkg/devspace/kubectl"
 	"github.com/devspace-cloud/devspace/pkg/devspace/services"
 	"github.com/devspace-cloud/devspace/pkg/util/log"
@@ -24,6 +20,8 @@ import (
 
 // ChangeWorkingDir changes the working directory
 func ChangeWorkingDir(pwd string) error {
+	log := log.GetInstance()
+
 	wd, err := filepath.Abs(pwd)
 	if err != nil {
 		return err
@@ -42,6 +40,8 @@ func ChangeWorkingDir(pwd string) error {
 
 // PrintTestResult prints a test result with a specific formatting
 func PrintTestResult(name string, err error) {
+	log := log.GetInstance()
+
 	successIcon := html.UnescapeString("&#" + strconv.Itoa(128513) + ";")
 	failureIcon := html.UnescapeString("&#" + strconv.Itoa(128545) + ";")
 
@@ -54,6 +54,8 @@ func PrintTestResult(name string, err error) {
 
 // DeleteNamespaceAndWait deletes a given namespace and waits for the process to finish
 func DeleteNamespaceAndWait(client kubectl.Client, namespace string) {
+	log := log.GetInstance()
+
 	log.StartWait("Deleting namespace '" + namespace + "'")
 	err := client.KubeClient().CoreV1().Namespaces().Delete(namespace, nil)
 	if err != nil {
@@ -73,15 +75,7 @@ func DeleteNamespaceAndWait(client kubectl.Client, namespace string) {
 
 // AnalyzePods waits for the pods to be running (if possible) and healthcheck them
 func AnalyzePods(client kubectl.Client, namespace string) error {
-	var problems []string
-	problems, err := analyze.Pods(client, namespace, false)
-	bs, jsonErr := json.Marshal(problems)
-	if jsonErr != nil {
-		return jsonErr
-	}
-	if len(problems) > 0 {
-		return errors.New("The following problems were found:" + string(bs))
-	}
+	err := analyze.NewAnalyzer(client, log.GetInstance()).Analyze(namespace, false)
 	if err != nil {
 		return err
 	}
@@ -91,6 +85,8 @@ func AnalyzePods(client kubectl.Client, namespace string) error {
 
 // PortForwardAndPing creates port-forwardings and ping them for a 200 status code
 func PortForwardAndPing(servicesClient services.Client) error {
+	log := log.GetInstance()
+
 	portForwarder, err := servicesClient.StartPortForwarding()
 	if err != nil {
 		return err
@@ -128,11 +124,11 @@ func PortForwardAndPing(servicesClient services.Client) error {
 }
 
 // ResetConfigs resets the different configs
-func ResetConfigs() {
-	// We reset the previous config
-	configutil.ResetConfig()
-	generated.ResetConfig()
-}
+// func ResetConfigs() {
+// 	// We reset the previous config
+// 	configutil.ResetConfig()
+// 	generated.ResetConfig()
+// }
 
 // Equal tells whether a and b contain the same elements.
 func Equal(a, b []string) bool {
@@ -271,6 +267,8 @@ func CreateTempDir() (dirPath string, dirName string, err error) {
 
 // DeleteTempDir deletes temp directory
 func DeleteTempDir(dirPath string) {
+	log := log.GetInstance()
+
 	//Delete temp folder
 	err := os.RemoveAll(dirPath)
 	if err != nil {

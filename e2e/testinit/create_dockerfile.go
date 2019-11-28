@@ -7,17 +7,12 @@ import (
 	"github.com/devspace-cloud/devspace/cmd"
 	"github.com/devspace-cloud/devspace/e2e/utils"
 	"github.com/devspace-cloud/devspace/pkg/devspace/config/versions/latest"
-	"github.com/devspace-cloud/devspace/pkg/devspace/docker"
-	"github.com/devspace-cloud/devspace/pkg/util/log"
 	"github.com/devspace-cloud/devspace/pkg/util/ptr"
-	dockertypes "github.com/docker/docker/api/types"
 )
 
 // CreateDockerfile runs init test with "create docker file" option
-func CreateDockerfile(namespace string, pwd string) error {
-	log.Info("Create Dockerfile Test")
-
-	utils.ResetConfigs()
+func CreateDockerfile(factory *customFactory, namespace string, pwd string) error {
+	factory.GetLog().Info("Create Dockerfile Test")
 
 	dirPath, dirName, err := utils.CreateTempDir()
 	if err != nil {
@@ -36,13 +31,7 @@ func CreateDockerfile(namespace string, pwd string) error {
 
 	port := 8080
 	testCase := &initTestCase{
-		name: "Create Dockerfile",
-		fakeDockerClient: &docker.FakeClient{
-			AuthConfig: &dockertypes.AuthConfig{
-				Username: "user",
-				Password: "pass",
-			},
-		},
+		name:    "Create Dockerfile",
 		answers: []string{cmd.CreateDockerfileOption, "go", "Use hub.docker.com => you are logged in as user", "user/" + dirName, "8080"},
 		expectedConfig: &latest.Config{
 			Version: latest.Version,
@@ -99,7 +88,7 @@ func CreateDockerfile(namespace string, pwd string) error {
 		},
 	}
 
-	err = initializeTest(*testCase)
+	err = initializeTest(factory, *testCase)
 	if err != nil {
 		return err
 	}

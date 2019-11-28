@@ -4,13 +4,11 @@ import (
 	"github.com/devspace-cloud/devspace/cmd"
 	"github.com/devspace-cloud/devspace/e2e/utils"
 	"github.com/devspace-cloud/devspace/pkg/devspace/config/versions/latest"
-	"github.com/devspace-cloud/devspace/pkg/devspace/docker"
 	"github.com/devspace-cloud/devspace/pkg/util/ptr"
-	dockertypes "github.com/docker/docker/api/types"
 )
 
 // UseDockerfile runs init test with "use existing dockerfile" option
-func UseDockerfile(namespace string, pwd string) error {
+func UseDockerfile(factory *customFactory, namespace string, pwd string) error {
 	dirPath, dirName, err := utils.CreateTempDir()
 	if err != nil {
 		return err
@@ -25,18 +23,9 @@ func UseDockerfile(namespace string, pwd string) error {
 		return err
 	}
 
-	// Reset configs after changing working dir
-	utils.ResetConfigs()
-
 	port := 8080
 	testCase := &initTestCase{
-		name: "Enter existing Dockerfile",
-		fakeDockerClient: &docker.FakeClient{
-			AuthConfig: &dockertypes.AuthConfig{
-				Username: "user",
-				Password: "pass",
-			},
-		},
+		name:    "Enter existing Dockerfile",
 		answers: []string{cmd.EnterDockerfileOption, "./Dockerfile", "Use hub.docker.com => you are logged in as user", "user/" + dirName, "8080"},
 		expectedConfig: &latest.Config{
 			Version: latest.Version,
@@ -93,7 +82,7 @@ func UseDockerfile(namespace string, pwd string) error {
 		},
 	}
 
-	err = initializeTest(*testCase)
+	err = initializeTest(factory, *testCase)
 	if err != nil {
 		return err
 	}

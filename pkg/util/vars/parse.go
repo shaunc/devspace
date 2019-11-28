@@ -61,6 +61,8 @@ func ParseString(value string, replace ReplaceVarFn) (interface{}, error) {
 
 // PrintStruct is a helper that prints a struct (or any interface) in JSON format
 func PrintStruct(s interface{}) {
+	log := log.GetInstance()
+
 	data, err := json.Marshal(s)
 	if err != nil {
 		log.Error("[PrintStruct] Error:", err)

@@ -4,14 +4,10 @@ import (
 	"github.com/devspace-cloud/devspace/cmd"
 	"github.com/devspace-cloud/devspace/e2e/utils"
 	"github.com/devspace-cloud/devspace/pkg/devspace/config/versions/latest"
-	"github.com/devspace-cloud/devspace/pkg/devspace/docker"
-	dockertypes "github.com/docker/docker/api/types"
 )
 
 // UseChart runs init test with "use helm chart" option
-func UseChart(namespace string, pwd string) error {
-	utils.ResetConfigs()
-
+func UseChart(factory *customFactory, namespace string, pwd string) error {
 	dirPath, dirName, err := utils.CreateTempDir()
 	if err != nil {
 		return err
@@ -27,13 +23,7 @@ func UseChart(namespace string, pwd string) error {
 	}
 
 	testCase := &initTestCase{
-		name: "Enter helm chart",
-		fakeDockerClient: &docker.FakeClient{
-			AuthConfig: &dockertypes.AuthConfig{
-				Username: "user",
-				Password: "pass",
-			},
-		},
+		name:    "Enter helm chart",
 		answers: []string{cmd.EnterHelmChartOption, "./chart"},
 		expectedConfig: &latest.Config{
 			Version: latest.Version,
@@ -52,7 +42,7 @@ func UseChart(namespace string, pwd string) error {
 		},
 	}
 
-	err = initializeTest(*testCase)
+	err = initializeTest(factory, *testCase)
 	if err != nil {
 		return err
 	}

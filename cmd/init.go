@@ -88,6 +88,7 @@ folder. Creates a devspace.yaml with all configuration.
 // Run executes the command logic
 func (cmd *InitCmd) Run(f factory.Factory, cobraCmd *cobra.Command, args []string) error {
 	// Check if config already exists
+	cmd.log = f.GetLog()
 	configLoader := f.NewConfigLoader(nil, cmd.log)
 	configExists := configLoader.Exists()
 	if configExists && cmd.Reconfigure == false {

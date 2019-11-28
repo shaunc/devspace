@@ -1,27 +1,22 @@
 package deploy
 
-
 import (
 	"github.com/devspace-cloud/devspace/cmd"
 	"github.com/devspace-cloud/devspace/cmd/flags"
 	"github.com/devspace-cloud/devspace/e2e/utils"
-	"github.com/devspace-cloud/devspace/pkg/devspace/config/configutil"
-	"github.com/devspace-cloud/devspace/pkg/devspace/config/generated"
-	"github.com/devspace-cloud/devspace/pkg/devspace/kubectl"
 	"github.com/devspace-cloud/devspace/pkg/devspace/services"
+	"github.com/devspace-cloud/devspace/pkg/util/factory"
 	"github.com/devspace-cloud/devspace/pkg/util/log"
 	"github.com/pkg/errors"
 )
 
-// RunMinikube runs the test for the kustomize example
-func RunMinikube(namespace string, pwd string) error {
-	log.Info("Run Minikube")
-
-	utils.ResetConfigs()
+// RunKaniko runs the test for the kaniko example
+func RunKaniko(f *factory.Factory) error {
+	f.GetLog().Info("Run Kaniko")
 
 	var deployConfig = &cmd.DeployCmd{
 		GlobalFlags: &flags.GlobalFlags{
-			Namespace: namespace,
+			Namespace: f.namespace,
 			NoWarn:    true,
 		},
 		ForceBuild:  true,
@@ -29,20 +24,21 @@ func RunMinikube(namespace string, pwd string) error {
 		SkipPush:    true,
 	}
 
-	err := utils.ChangeWorkingDir(pwd + "/../examples/minikube")
-	if err != nil {
-		return err
-	}
-
 	// Create kubectl client
-	var client kubectl.Client
-	client, err = kubectl.NewClientFromContext(deployConfig.KubeContext, deployConfig.Namespace, deployConfig.SwitchContext)
+	client, err := f.NewKubeClientFromContext(deployConfig.KubeContext, deployConfig.Namespace, deployConfig.SwitchContext)
 	if err != nil {
 		return errors.Errorf("Unable to create new kubectl client: %v", err)
 	}
 
-	// At last, we delete the current namespace
-	defer utils.DeleteNamespaceAndWait(client, deployConfig.Namespace)
+	defer func() {
+		// At last, we delete the current namespace
+		utils.DeleteNamespaceAndWait(client, deployConfig.Namespace)
+	}()
+
+	err = utils.ChangeWorkingDir(f.pwd + "/../examples/kaniko")
+	if err != nil {
+		return err
+	}
 
 	err = deployConfig.Run(nil, nil)
 	if err != nil {
@@ -50,10 +46,10 @@ func RunMinikube(namespace string, pwd string) error {
 	}
 
 	// Checking if pods are running correctly
-	utils.AnalyzePods(client, namespace)
+	utils.AnalyzePods(client, f.namespace)
 
 	// Load generated config
-	generatedConfig, err := generated.LoadConfig(deployConfig.Profile)
+	generatedConfig, err := f.NewConfigLoader(deployConfig.Profile)
 	if err != nil {
 		return errors.Errorf("Error loading generated.yaml: %v", err)
 	}

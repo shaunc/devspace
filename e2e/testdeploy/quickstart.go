@@ -1,26 +1,22 @@
-package deploy
+package testdeploy
 
 import (
 	"github.com/devspace-cloud/devspace/cmd"
 	"github.com/devspace-cloud/devspace/cmd/flags"
 	"github.com/devspace-cloud/devspace/e2e/utils"
-	"github.com/devspace-cloud/devspace/pkg/devspace/config/configutil"
-	"github.com/devspace-cloud/devspace/pkg/devspace/config/generated"
-	"github.com/devspace-cloud/devspace/pkg/devspace/kubectl"
 	"github.com/devspace-cloud/devspace/pkg/devspace/services"
+	"github.com/devspace-cloud/devspace/pkg/util/factory"
 	"github.com/devspace-cloud/devspace/pkg/util/log"
 	"github.com/pkg/errors"
 )
 
-// RunQuickstartKubectl runs the test for the quickstart example
-func RunQuickstartKubectl(namespace string, pwd string) error {
-	log.Info("Run Quickstart Kubectl")
-
-	utils.ResetConfigs()
+// RunQuickstart runs the test for the quickstart example
+func RunQuickstart(f *factory.Factory) error {
+	f.GetLog().Info("Run Quickstart")
 
 	var deployConfig = &cmd.DeployCmd{
 		GlobalFlags: &flags.GlobalFlags{
-			Namespace: namespace,
+			Namespace: f.namespace,
 			NoWarn:    true,
 		},
 		// ForceBuild:  true,
@@ -28,14 +24,13 @@ func RunQuickstartKubectl(namespace string, pwd string) error {
 		// SkipPush:    true,
 	}
 
-	err := utils.ChangeWorkingDir(pwd + "/../examples/quickstart-kubectl")
+	err := utils.ChangeWorkingDir(f.pwd + "/../examples/quickstart")
 	if err != nil {
 		return err
 	}
 
 	// Create kubectl client
-	var client kubectl.Client
-	client, err = kubectl.NewClientFromContext(deployConfig.KubeContext, deployConfig.Namespace, deployConfig.SwitchContext)
+	client, err := f.NewKubeClientFromContext(deployConfig.KubeContext, deployConfig.Namespace, deployConfig.SwitchContext)
 	if err != nil {
 		return errors.Errorf("Unable to create new kubectl client: %v", err)
 	}
@@ -43,16 +38,16 @@ func RunQuickstartKubectl(namespace string, pwd string) error {
 	// At last, we delete the current namespace
 	defer utils.DeleteNamespaceAndWait(client, deployConfig.Namespace)
 
-	err = deployConfig.Run(nil, nil)
+	err = deployConfig.Run(f.DefaultFactoryImpl, nil, nil)
 	if err != nil {
 		return err
 	}
 
 	// Checking if pods are running correctly
-	utils.AnalyzePods(client, namespace)
+	utils.AnalyzePods(client, f.namespace)
 
 	// Load generated config
-	generatedConfig, err := generated.LoadConfig(deployConfig.Profile)
+	generatedConfig, err := f.NewConfigLoader(nil, nil).Generated()
 	if err != nil {
 		return errors.Errorf("Error loading generated.yaml: %v", err)
 	}
