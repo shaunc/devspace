@@ -15,12 +15,12 @@ import (
 	"github.com/devspace-cloud/devspace/pkg/devspace/analyze"
 	"github.com/devspace-cloud/devspace/pkg/devspace/kubectl"
 	"github.com/devspace-cloud/devspace/pkg/devspace/services"
-	"github.com/devspace-cloud/devspace/pkg/util/log"
+	logger "github.com/devspace-cloud/devspace/pkg/util/log"
 )
 
 // ChangeWorkingDir changes the working directory
 func ChangeWorkingDir(pwd string) error {
-	log := log.GetInstance()
+	log := logger.GetInstance()
 
 	wd, err := filepath.Abs(pwd)
 	if err != nil {
@@ -40,7 +40,7 @@ func ChangeWorkingDir(pwd string) error {
 
 // PrintTestResult prints a test result with a specific formatting
 func PrintTestResult(name string, err error) {
-	log := log.GetInstance()
+	log := logger.GetInstance()
 
 	successIcon := html.UnescapeString("&#" + strconv.Itoa(128513) + ";")
 	failureIcon := html.UnescapeString("&#" + strconv.Itoa(128545) + ";")
@@ -54,7 +54,7 @@ func PrintTestResult(name string, err error) {
 
 // DeleteNamespaceAndWait deletes a given namespace and waits for the process to finish
 func DeleteNamespaceAndWait(client kubectl.Client, namespace string) {
-	log := log.GetInstance()
+	log := logger.GetInstance()
 
 	log.StartWait("Deleting namespace '" + namespace + "'")
 	err := client.KubeClient().CoreV1().Namespaces().Delete(namespace, nil)
@@ -75,7 +75,7 @@ func DeleteNamespaceAndWait(client kubectl.Client, namespace string) {
 
 // AnalyzePods waits for the pods to be running (if possible) and healthcheck them
 func AnalyzePods(client kubectl.Client, namespace string) error {
-	err := analyze.NewAnalyzer(client, log.GetInstance()).Analyze(namespace, false)
+	err := analyze.NewAnalyzer(client, logger.GetInstance()).Analyze(namespace, false)
 	if err != nil {
 		return err
 	}
@@ -85,7 +85,7 @@ func AnalyzePods(client kubectl.Client, namespace string) error {
 
 // PortForwardAndPing creates port-forwardings and ping them for a 200 status code
 func PortForwardAndPing(servicesClient services.Client) error {
-	log := log.GetInstance()
+	log := logger.GetInstance()
 
 	portForwarder, err := servicesClient.StartPortForwarding()
 	if err != nil {
@@ -122,13 +122,6 @@ func PortForwardAndPing(servicesClient services.Client) error {
 
 	return nil
 }
-
-// ResetConfigs resets the different configs
-// func ResetConfigs() {
-// 	// We reset the previous config
-// 	configutil.ResetConfig()
-// 	generated.ResetConfig()
-// }
 
 // Equal tells whether a and b contain the same elements.
 func Equal(a, b []string) bool {
@@ -267,7 +260,7 @@ func CreateTempDir() (dirPath string, dirName string, err error) {
 
 // DeleteTempDir deletes temp directory
 func DeleteTempDir(dirPath string) {
-	log := log.GetInstance()
+	log := logger.GetInstance()
 
 	//Delete temp folder
 	err := os.RemoveAll(dirPath)

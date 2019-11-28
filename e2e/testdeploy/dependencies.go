@@ -1,10 +1,10 @@
 package testdeploy
 
 // RunQuickstart runs the test for the quickstart example
-func RunQuickstart(f *customFactory) error {
-	f.GetLog().Info("Run Quickstart")
+func RunDependencies(f *customFactory) error {
+	f.GetLog().Info("Run Dependencies")
 
-	err := RunTest(f, "quickstart", nil)
+	err := RunTest(f, "dependencies", nil)
 	if err != nil {
 		return err
 	}

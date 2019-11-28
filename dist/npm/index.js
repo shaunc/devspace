@@ -340,7 +340,7 @@ exec("npm bin -g || yarn global bin", function(err, stdout, stderr) {
           spinner.stop(true);
 
           try {
-            fs.chmodSync(binaryPath + downloadExtension, 0755);
+            fs.chmodSync(binaryPath + downloadExtension, 755);
           } catch (e) {
             showRootError();
           }
