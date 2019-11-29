@@ -7,7 +7,7 @@ import (
 )
 
 // UseManifests runs init test with "use kubernetes manifests" option
-func UseManifests(factory *customFactory, namespace string, pwd string) error {
+func UseManifests(factory *customFactory, pwd string) error {
 	dirPath, dirName, err := utils.CreateTempDir()
 	if err != nil {
 		return err
@@ -15,7 +15,10 @@ func UseManifests(factory *customFactory, namespace string, pwd string) error {
 
 	defer utils.DeleteTempDir(dirPath)
 
-	utils.Copy(pwd+"/testinit/testdata", dirPath)
+	err = utils.Copy(pwd+"/testinit/testdata", dirPath)
+	if err != nil {
+		return err
+	}
 
 	err = utils.ChangeWorkingDir(dirPath)
 	if err != nil {

@@ -7,7 +7,7 @@ import (
 )
 
 // UseChart runs init test with "use helm chart" option
-func UseChart(factory *customFactory, namespace string, pwd string) error {
+func UseChart(factory *customFactory, pwd string) error {
 	dirPath, dirName, err := utils.CreateTempDir()
 	if err != nil {
 		return err
@@ -15,7 +15,10 @@ func UseChart(factory *customFactory, namespace string, pwd string) error {
 
 	defer utils.DeleteTempDir(dirPath)
 
-	utils.Copy(pwd+"/testinit/testdata", dirPath)
+	err = utils.Copy(pwd+"/testinit/testdata", dirPath)
+	if err != nil {
+		return err
+	}
 
 	err = utils.ChangeWorkingDir(dirPath)
 	if err != nil {

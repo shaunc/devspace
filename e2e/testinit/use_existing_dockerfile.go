@@ -8,7 +8,7 @@ import (
 )
 
 // UseExistingDockerfile runs init test with "create docker file" option
-func UseExistingDockerfile(factory *customFactory, namespace string, pwd string) error {
+func UseExistingDockerfile(factory *customFactory, pwd string) error {
 	dirPath, dirName, err := utils.CreateTempDir()
 	if err != nil {
 		return err
@@ -17,7 +17,10 @@ func UseExistingDockerfile(factory *customFactory, namespace string, pwd string)
 	defer utils.DeleteTempDir(dirPath)
 
 	// Copy the testdata into the temp dir
-	utils.Copy(pwd+"/testinit/testdata/Dockerfile", dirPath+"/Dockerfile")
+	err = utils.Copy(pwd+"/testinit/testdata/Dockerfile", dirPath+"/Dockerfile")
+	if err != nil {
+		return err
+	}
 
 	err = utils.ChangeWorkingDir(dirPath)
 	if err != nil {

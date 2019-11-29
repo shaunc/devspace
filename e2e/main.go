@@ -2,8 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/devspace-cloud/devspace/e2e/testdeploy"
-	"github.com/devspace-cloud/devspace/e2e/testinit"
+	"github.com/devspace-cloud/devspace/e2e/testenter"
 	"os"
 )
 
@@ -16,6 +15,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	testdeploy.TestDeploy(testNamespace, pwd)
-	testinit.TestInit(testNamespace, pwd)
+	//testdeploy.TestDeploy(testNamespace, pwd)
+	//testinit.TestInit(pwd)
+	testenter.TestEnter(pwd, testNamespace)
 }

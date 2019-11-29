@@ -57,23 +57,23 @@ func (c *customFactory) GetLog() log.Logger {
 }
 
 // TestInit runs the e2e tests for the init cmd
-func TestInit(ns string, pwd string) {
+func TestInit(pwd string) {
 	myFactory := &customFactory{}
 	myFactory.FakeLogger = fakelog.NewFakeLogger()
 
-	err := CreateDockerfile(myFactory, ns, pwd)
+	err := CreateDockerfile(myFactory, pwd)
 	utils.PrintTestResult("Create Dockerfile", err)
 
-	err = UseExistingDockerfile(myFactory, ns, pwd)
+	err = UseExistingDockerfile(myFactory, pwd)
 	utils.PrintTestResult("Use Existing Dockerfile", err)
 
-	err = UseDockerfile(myFactory, ns, pwd)
+	err = UseDockerfile(myFactory, pwd)
 	utils.PrintTestResult("Use Dockerfile", err)
 
-	err = UseManifests(myFactory, ns, pwd)
+	err = UseManifests(myFactory, pwd)
 	utils.PrintTestResult("Use Kubectl Manifests", err)
 
-	err = UseChart(myFactory, ns, pwd)
+	err = UseChart(myFactory, pwd)
 	utils.PrintTestResult("Use Helm Chart", err)
 }
 

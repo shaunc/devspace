@@ -11,7 +11,7 @@ import (
 )
 
 // CreateDockerfile runs init test with "create docker file" option
-func CreateDockerfile(factory *customFactory, namespace string, pwd string) error {
+func CreateDockerfile(factory *customFactory, pwd string) error {
 	factory.GetLog().Info("Create Dockerfile Test")
 
 	dirPath, dirName, err := utils.CreateTempDir()
@@ -27,7 +27,10 @@ func CreateDockerfile(factory *customFactory, namespace string, pwd string) erro
 	}
 
 	// Copy the testdata into the temp dir
-	utils.Copy(pwd+"/testinit/testdata/main.go", dirPath+"/main.go")
+	err = utils.Copy(pwd+"/testinit/testdata/main.go", dirPath+"/main.go")
+	if err != nil {
+		return err
+	}
 
 	port := 8080
 	testCase := &initTestCase{
