@@ -4,6 +4,7 @@ import (
 	"github.com/devspace-cloud/devspace/pkg/devspace/cloud/client"
 	"github.com/devspace-cloud/devspace/pkg/devspace/cloud/config"
 	"github.com/devspace-cloud/devspace/pkg/devspace/cloud/config/versions/latest"
+	"github.com/devspace-cloud/devspace/pkg/util/browser"
 	"github.com/devspace-cloud/devspace/pkg/util/log"
 	"github.com/devspace-cloud/devspace/pkg/util/survey"
 	"github.com/pkg/errors"
@@ -37,6 +38,7 @@ const DevSpaceKubeContextName = "devspace"
 type provider struct {
 	latest.Provider
 
+	browser browser.Browser
 	client client.Client
 	loader config.Loader
 	log    log.Logger
@@ -97,9 +99,13 @@ func GetProviderWithOptions(useProviderName, key string, relogin bool, loader co
 
 	provider := &provider{
 		*p,
+		browser.NewBrowser(),
 		client.NewClient(providerName, p.Host, p.Key, p.Token),
 		loader,
 		log,
+	}
+	if provider.Provider.ClusterKey == nil {
+		provider.Provider.ClusterKey = map[int]string{}
 	}
 	if relogin == true || provider.Key == "" {
 		provider.Token = ""
