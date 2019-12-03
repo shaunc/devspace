@@ -63,15 +63,15 @@ devspace add deployment my-deployment --manifests=kube/* --namespace=devspace
 	}
 
 	// Kubectl options
-	addDeploymentCmd.Flags().StringVar(&cmd.Manifests, "manifests", "", "The kubernetes manifests to deploy (glob pattern are allowed, comma separated, e.g. manifests/** or kube/pod.yaml)")
+	addDeploymentCmd.Flags().StringVar(&cmd.Manifests, "manifests", "", "The kubernetes manifests to examples (glob pattern are allowed, comma separated, e.g. manifests/** or kube/pod.yaml)")
 
 	// Helm chart options
-	addDeploymentCmd.Flags().StringVar(&cmd.Chart, "chart", "", "A helm chart to deploy (e.g. ./chart or stable/mysql)")
+	addDeploymentCmd.Flags().StringVar(&cmd.Chart, "chart", "", "A helm chart to examples (e.g. ./chart or stable/mysql)")
 	addDeploymentCmd.Flags().StringVar(&cmd.ChartVersion, "chart-version", "", "The helm chart version to use")
 	addDeploymentCmd.Flags().StringVar(&cmd.ChartRepo, "chart-repo", "", "The helm chart repository url to use")
 
 	// Component options
-	addDeploymentCmd.Flags().StringVar(&cmd.Image, "image", "", "A docker image to deploy (e.g. dscr.io/myuser/myrepo or dockeruser/repo:0.1 or mysql:latest)")
+	addDeploymentCmd.Flags().StringVar(&cmd.Image, "image", "", "A docker image to examples (e.g. dscr.io/myuser/myrepo or dockeruser/repo:0.1 or mysql:latest)")
 	addDeploymentCmd.Flags().StringVar(&cmd.Component, "component", "", "A predefined component to use (run `devspace list available-components` to see all available components)")
 	addDeploymentCmd.Flags().StringVar(&cmd.Dockerfile, "dockerfile", "", "A dockerfile")
 	addDeploymentCmd.Flags().StringVar(&cmd.Context, "context", "", "")
@@ -128,7 +128,7 @@ func (cmd *deploymentCmd) RunAddDeployment(cobraCmd *cobra.Command, args []strin
 	} else if cmd.Component != "" {
 		newDeployment, err = configure.GetPredefinedComponentDeployment(deploymentName, cmd.Component, log.GetInstance())
 	} else {
-		return errors.New("Please specifiy one of these parameters:\n--image: A docker image to deploy (e.g. dscr.io/myuser/myrepo or dockeruser/repo:0.1 or mysql:latest)\n--manifests: The kubernetes manifests to deploy (glob pattern are allowed, comma separated, e.g. manifests/** or kube/pod.yaml)\n--chart: A helm chart to deploy (e.g. ./chart or stable/mysql)\n--component: A predefined component to use (run `devspace list available-components` to see all available components)")
+		return errors.New("Please specifiy one of these parameters:\n--image: A docker image to examples (e.g. dscr.io/myuser/myrepo or dockeruser/repo:0.1 or mysql:latest)\n--manifests: The kubernetes manifests to examples (glob pattern are allowed, comma separated, e.g. manifests/** or kube/pod.yaml)\n--chart: A helm chart to examples (e.g. ./chart or stable/mysql)\n--component: A predefined component to use (run `devspace list available-components` to see all available components)")
 	}
 	if err != nil {
 		return err

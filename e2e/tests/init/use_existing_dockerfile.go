@@ -1,4 +1,4 @@
-package testinit
+package init
 
 import (
 	"github.com/devspace-cloud/devspace/cmd"
@@ -7,8 +7,8 @@ import (
 	"github.com/devspace-cloud/devspace/pkg/util/ptr"
 )
 
-// UseDockerfile runs init test with "use existing dockerfile" option
-func UseDockerfile(factory *customFactory, pwd string) error {
+// UseExistingDockerfile runs init test with "create docker file" option
+func UseExistingDockerfile(factory *customFactory, pwd string) error {
 	dirPath, dirName, err := utils.CreateTempDir()
 	if err != nil {
 		return err
@@ -16,7 +16,8 @@ func UseDockerfile(factory *customFactory, pwd string) error {
 
 	defer utils.DeleteTempDir(dirPath)
 
-	err = utils.Copy(pwd+"/testinit/testdata", dirPath)
+	// Copy the testdata into the temp dir
+	err = utils.Copy(pwd+"/init/testdata/Dockerfile", dirPath+"/Dockerfile")
 	if err != nil {
 		return err
 	}
@@ -29,7 +30,7 @@ func UseDockerfile(factory *customFactory, pwd string) error {
 	port := 8080
 	testCase := &initTestCase{
 		name:    "Enter existing Dockerfile",
-		answers: []string{cmd.EnterDockerfileOption, "./Dockerfile", "Use hub.docker.com => you are logged in as user", "user/" + dirName, "8080"},
+		answers: []string{cmd.UseExistingDockerfileOption, "Use hub.docker.com => you are logged in as user", "user/" + dirName, "8080"},
 		expectedConfig: &latest.Config{
 			Version: latest.Version,
 			Images: map[string]*latest.ImageConfig{

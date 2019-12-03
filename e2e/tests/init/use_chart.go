@@ -1,4 +1,4 @@
-package testinit
+package init
 
 import (
 	"github.com/devspace-cloud/devspace/cmd"
@@ -6,8 +6,8 @@ import (
 	"github.com/devspace-cloud/devspace/pkg/devspace/config/versions/latest"
 )
 
-// UseManifests runs init test with "use kubernetes manifests" option
-func UseManifests(factory *customFactory, pwd string) error {
+// UseChart runs init test with "use helm chart" option
+func UseChart(factory *customFactory, pwd string) error {
 	dirPath, dirName, err := utils.CreateTempDir()
 	if err != nil {
 		return err
@@ -15,7 +15,7 @@ func UseManifests(factory *customFactory, pwd string) error {
 
 	defer utils.DeleteTempDir(dirPath)
 
-	err = utils.Copy(pwd+"/testinit/testdata", dirPath)
+	err = utils.Copy(pwd+"/init/testdata", dirPath)
 	if err != nil {
 		return err
 	}
@@ -26,16 +26,16 @@ func UseManifests(factory *customFactory, pwd string) error {
 	}
 
 	testCase := &initTestCase{
-		name:    "Enter kubernetes manifests",
-		answers: []string{cmd.EnterManifestsOption, "kube/**"},
+		name:    "Enter helm chart",
+		answers: []string{cmd.EnterHelmChartOption, "./chart"},
 		expectedConfig: &latest.Config{
 			Version: latest.Version,
 			Deployments: []*latest.DeploymentConfig{
 				&latest.DeploymentConfig{
 					Name: dirName,
-					Kubectl: &latest.KubectlConfig{
-						Manifests: []string{
-							"kube/**",
+					Helm: &latest.HelmConfig{
+						Chart: &latest.ChartConfig{
+							Name: "./chart",
 						},
 					},
 				},

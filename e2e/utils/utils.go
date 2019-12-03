@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -26,6 +27,7 @@ func ChangeWorkingDir(pwd string) error {
 	if err != nil {
 		return err
 	}
+	fmt.Println("WD:", wd)
 	// Change working directory
 	err = os.Chdir(wd)
 	if err != nil {
@@ -48,7 +50,7 @@ func PrintTestResult(name string, err error) {
 	if err == nil {
 		fmt.Printf("%v  %v successfully deployed!\n", successIcon, name)
 	} else {
-		log.Fatalf("%v  %v failed to deploy: %v\n", failureIcon, name, err)
+		log.Fatalf("%v  %v failed to examples: %v\n", failureIcon, name, err)
 	}
 }
 
@@ -249,7 +251,7 @@ func lcopy(src, dest string, info os.FileInfo) error {
 // CreateTempDir creates a temp directory in /tmp
 func CreateTempDir() (dirPath string, dirName string, err error) {
 	// Create temp dir in /tmp/
-	dirPath, err = ioutil.TempDir("", "testinit")
+	dirPath, err = ioutil.TempDir("", "init")
 	dirName = filepath.Base(dirPath)
 	if err != nil {
 		return
@@ -267,4 +269,44 @@ func DeleteTempDir(dirPath string) {
 	if err != nil {
 		log.Fatalf("Error removing dir: %v", err)
 	}
+}
+
+// Capture replaces os.Stdout with a writer that buffers any data written
+// to os.Stdout. Call the returned function to cleanup and get the data
+// as a string.
+func Capture() func() (string, error) {
+	r, w, err := os.Pipe()
+	if err != nil {
+		panic(err)
+	}
+
+	done := make(chan error, 1)
+
+	save := os.Stdout
+	os.Stdout = w
+
+	var buf strings.Builder
+
+	go func() {
+		_, err := io.Copy(&buf, r)
+		r.Close()
+		done <- err
+	}()
+
+	return func() (string, error) {
+		os.Stdout = save
+		w.Close()
+		err := <-done
+		return buf.String(), err
+	}
+}
+
+// StringInSlice checks if a string is in a slice
+func StringInSlice(str string, list []string) bool {
+	for _, v := range list {
+		if v == str {
+			return true
+		}
+	}
+	return false
 }

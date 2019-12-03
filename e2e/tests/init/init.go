@@ -1,4 +1,4 @@
-package testinit
+package init
 
 import (
 	"fmt"

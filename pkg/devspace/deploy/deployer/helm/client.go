@@ -19,7 +19,7 @@ var DevSpaceChartConfig = &latest.ChartConfig{
 	RepoURL: "https://charts.devspace.cloud",
 }
 
-// DeployConfig holds the information necessary to deploy via helm
+// DeployConfig holds the information necessary to examples via helm
 type DeployConfig struct {
 	// Public because we can switch them to fake clients for testing
 	Kube kubectl.Client

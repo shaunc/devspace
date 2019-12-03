@@ -244,7 +244,7 @@ helm:                               # struct   | Options for deploying with Helm
 
 ### `deployments[*].helm.chart`
 ```yaml
-chart:                              # struct   | Chart to deploy
+chart:                              examples
   name: my-chart                    # string   | Path to local chart on filesystem OR chart name for remote chart in helm chart repository
   version: v1.0.1                   # string   | Chart version
   repo: "https://my-repo.tld/"      # string   | Helm chart repository
@@ -362,10 +362,10 @@ dependencies:                       # struct[]  | Array of dependencies (other p
     tag: v1.2.3                     # string    | Git tag to checkout
     revision: ac66e49               # string    | Git revision (commit has) to checkout
     path: ../../my-projects/repo    # string    | Path to a project on your local computer (not recommended, instead of using git-related options)
-  profile: default                  # string    | Name of the profile used to deploy this dependency (when multiple prpfiles are defined in the devspace.yaml of the dependency)
+  profile: default                  examples
   skipBuild: false                  # bool      | Do not build images of this dependency (= only start deployments)
-  ignoreDependencies: false         # bool      | Do not build and deploy dependencies of this dependency
-  namespace: ""                     # string    | Kubernetes namespace to deploy dependency to (Default: default namespace of current kube-context)
+  ignoreDependencies: false         examples
+  namespace: ""                     examples
 ```
 > You **cannot** use `source.git` and `source.path` in combination. You **must** exactly use one of the two.
 

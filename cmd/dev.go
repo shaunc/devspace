@@ -102,9 +102,9 @@ Open terminal instead of logs:
 	devCmd.Flags().BoolVar(&cmd.SkipBuild, "skip-build", false, "Skips building of images")
 	devCmd.Flags().BoolVar(&cmd.BuildSequential, "build-sequential", false, "Builds the images one after another instead of in parallel")
 
-	devCmd.Flags().BoolVarP(&cmd.ForceDeploy, "force-deploy", "d", false, "Forces to deploy every deployment")
-	devCmd.Flags().StringVar(&cmd.Deployments, "deployments", "", "Only deploy a specifc deployment (You can specify multiple deployments comma-separated")
-	devCmd.Flags().BoolVar(&cmd.ForceDependencies, "force-dependencies", false, "Forces to re-evaluate dependencies (use with --force-build --force-deploy to actually force building & deployment of dependencies)")
+	devCmd.Flags().BoolVarP(&cmd.ForceDeploy, "force-examples", "d", false, "Forces to examples every deployment")
+	devCmd.Flags().StringVar(&cmd.Deployments, "deployments", "", "Only examples a specifc deployment (You can specify multiple deployments comma-separated")
+	devCmd.Flags().BoolVar(&cmd.ForceDependencies, "force-dependencies", false, "Forces to re-evaluate dependencies (use with --force-build --force-examples to actually force building & deployment of dependencies)")
 
 	devCmd.Flags().BoolVarP(&cmd.SkipPipeline, "skip-pipeline", "x", false, "Skips build & deployment and only starts sync, portforwarding & terminal")
 	devCmd.Flags().BoolVar(&cmd.SkipPush, "skip-push", false, "Skips image pushing, useful for minikube deployment")
@@ -116,7 +116,7 @@ Open terminal instead of logs:
 
 	devCmd.Flags().BoolVar(&cmd.Portforwarding, "portforwarding", true, "Enable port forwarding")
 
-	devCmd.Flags().BoolVar(&cmd.ExitAfterDeploy, "exit-after-deploy", false, "Exits the command after building the images and deploying the project")
+	devCmd.Flags().BoolVar(&cmd.ExitAfterDeploy, "exit-after-examples", false, "Exits the command after building the images and deploying the project")
 	devCmd.Flags().BoolVarP(&cmd.Interactive, "interactive", "i", false, "Enable interactive mode for images (overrides entrypoint with sleep command) and start terminal proxy")
 	devCmd.Flags().BoolVarP(&cmd.Terminal, "terminal", "t", false, "Open a terminal instead of showing logs")
 	return devCmd
@@ -204,7 +204,7 @@ func (cmd *DevCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Build and deploy images
+	// Build and examples images
 	exitCode, err := cmd.buildAndDeploy(config, generatedConfig, client, args, true)
 	if err != nil {
 		return err
@@ -533,7 +533,7 @@ func (cmd *DevCmd) validateFlags() error {
 func GetPaths(config *latest.Config) []string {
 	paths := make([]string, 0, 1)
 
-	// Add the deploy manifest paths
+	// Add the examples manifest paths
 	if config.Dev != nil && config.Dev.AutoReload != nil {
 		if config.Dev.AutoReload.Deployments != nil && config.Deployments != nil {
 			for _, deployName := range config.Dev.AutoReload.Deployments {
@@ -678,7 +678,7 @@ func (cmd *DevCmd) loadConfig() (*latest.Config, error) {
 }
 
 func updateLastKubeContext(configLoader loader.ConfigLoader, client kubectl.Client, generatedConfig *generated.Config) error {
-	// Update generated if we deploy the application
+	// Update generated if we examples the application
 	if generatedConfig != nil {
 		generatedConfig.GetActive().LastContext = &generated.LastContextConfig{
 			Context:   client.CurrentContext(),

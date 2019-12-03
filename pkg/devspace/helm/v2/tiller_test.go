@@ -18,7 +18,7 @@ import ()
 		},
 	}
 
-	deploy := &v1beta1.Deployment{
+	examples := &v1beta1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{Name: TillerDeploymentName},
 		Spec: v1beta1.DeploymentSpec{
 			Replicas: ptr.Int32(1),
@@ -40,7 +40,7 @@ import ()
 			UpdatedReplicas:    1,
 		},
 	}
-	_, err := client.AppsV1().Deployments(loader.TestNamespace).Create(deploy)
+	_, err := client.AppsV1().Deployments(loader.TestNamespace).Create(examples)
 	if err != nil {
 		return errors.Wrap(err, "create deployment")
 	}

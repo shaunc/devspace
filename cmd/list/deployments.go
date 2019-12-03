@@ -107,19 +107,19 @@ func (cmd *deploymentsCmd) RunDeploymentsStatus(cobraCmd *cobra.Command, args []
 			if deployConfig.Kubectl != nil {
 				deployClient, err = deployKubectl.New(config, client, deployConfig, log)
 				if err != nil {
-					log.Warnf("Unable to create kubectl deploy config for %s: %v", deployConfig.Name, err)
+					log.Warnf("Unable to create kubectl examples config for %s: %v", deployConfig.Name, err)
 					continue
 				}
 			} else if deployConfig.Helm != nil {
 				helmClient, err := deploy.GetCachedHelmClient(config, deployConfig, client, helmV2Clients, log)
 				if err != nil {
-					log.Warnf("Unable to create helm deploy config for %s: %v", deployConfig.Name, err)
+					log.Warnf("Unable to create helm examples config for %s: %v", deployConfig.Name, err)
 					continue
 				}
 
 				deployClient, err = deployHelm.New(config, helmClient, client, deployConfig, log)
 				if err != nil {
-					log.Warnf("Unable to create helm deploy config for %s: %v", deployConfig.Name, err)
+					log.Warnf("Unable to create helm examples config for %s: %v", deployConfig.Name, err)
 					continue
 				}
 			} else {

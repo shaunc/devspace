@@ -1,19 +1,14 @@
-package testinit
+package init
 
 import (
-	"errors"
-	"os"
-
 	"github.com/devspace-cloud/devspace/cmd"
 	"github.com/devspace-cloud/devspace/e2e/utils"
 	"github.com/devspace-cloud/devspace/pkg/devspace/config/versions/latest"
 	"github.com/devspace-cloud/devspace/pkg/util/ptr"
 )
 
-// CreateDockerfile runs init test with "create docker file" option
-func CreateDockerfile(factory *customFactory, pwd string) error {
-	factory.GetLog().Info("Create Dockerfile Test")
-
+// UseDockerfile runs init test with "use existing dockerfile" option
+func UseDockerfile(factory *customFactory, pwd string) error {
 	dirPath, dirName, err := utils.CreateTempDir()
 	if err != nil {
 		return err
@@ -21,21 +16,20 @@ func CreateDockerfile(factory *customFactory, pwd string) error {
 
 	defer utils.DeleteTempDir(dirPath)
 
-	err = utils.ChangeWorkingDir(dirPath)
+	err = utils.Copy(pwd+"/init/testdata", dirPath)
 	if err != nil {
 		return err
 	}
 
-	// Copy the testdata into the temp dir
-	err = utils.Copy(pwd+"/testinit/testdata/main.go", dirPath+"/main.go")
+	err = utils.ChangeWorkingDir(dirPath)
 	if err != nil {
 		return err
 	}
 
 	port := 8080
 	testCase := &initTestCase{
-		name:    "Create Dockerfile",
-		answers: []string{cmd.CreateDockerfileOption, "go", "Use hub.docker.com => you are logged in as user", "user/" + dirName, "8080"},
+		name:    "Enter existing Dockerfile",
+		answers: []string{cmd.EnterDockerfileOption, "./Dockerfile", "Use hub.docker.com => you are logged in as user", "user/" + dirName, "8080"},
 		expectedConfig: &latest.Config{
 			Version: latest.Version,
 			Images: map[string]*latest.ImageConfig{
@@ -84,7 +78,7 @@ func CreateDockerfile(factory *customFactory, pwd string) error {
 				Sync: []*latest.SyncConfig{
 					&latest.SyncConfig{
 						ImageName:    "default",
-						ExcludePaths: []string{"Dockerfile", "devspace.yaml"},
+						ExcludePaths: []string{"devspace.yaml"},
 					},
 				},
 			},
@@ -94,11 +88,6 @@ func CreateDockerfile(factory *customFactory, pwd string) error {
 	err = initializeTest(factory, *testCase)
 	if err != nil {
 		return err
-	}
-
-	// Check if Dockerfile has not been created
-	if _, err := os.Stat(dirPath + "/Dockerfile"); os.IsNotExist(err) {
-		return errors.New("Dockerfile was not created")
 	}
 
 	return nil

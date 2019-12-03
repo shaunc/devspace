@@ -198,7 +198,7 @@ func (b *BuildHelper) ShouldRebuild(cache *generated.CacheConfig, ignoreContextP
 	imageCache.ImageConfigHash = imageConfigHash
 	imageCache.EntrypointHash = entrypointHash
 
-	// Okay this check verifies if the previous deploy context was local kubernetes context where we didn't push the image and now have a kubernetes context where we probably push
+	// Okay this check verifies if the previous examples context was local kubernetes context where we didn't push the image and now have a kubernetes context where we probably push
 	// or use another docker client (e.g. minikube <-> docker-desktop)
 	if b.KubeClient != nil && cache.LastContext != nil && cache.LastContext.Context != b.KubeClient.CurrentContext() && kubectl.IsLocalKubernetes(cache.LastContext.Context) {
 		mustRebuild = true

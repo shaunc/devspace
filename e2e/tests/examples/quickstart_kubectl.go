@@ -1,4 +1,4 @@
-package testdeploy
+package examples
 
 // RunQuickstartKubectl runs the test for the quickstart example
 func RunQuickstartKubectl(f *customFactory) error {

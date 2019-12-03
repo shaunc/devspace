@@ -1,4 +1,4 @@
-package testdeploy
+package examples
 
 // RunKustomize runs the test for the kustomize example
 func RunKustomize(f *customFactory) error {

@@ -1,4 +1,4 @@
-package testdeploy
+package examples
 
 // RunMinikube runs the test for the kustomize example
 func RunMinikube(f *customFactory) error {

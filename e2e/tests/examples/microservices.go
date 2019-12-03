@@ -1,4 +1,4 @@
-package testdeploy
+package examples
 
 // RunMicroservices runs the test for the kustomize example
 func RunMicroservices(f *customFactory) error {

@@ -1,4 +1,4 @@
-package testdeploy
+package examples
 
 // RunQuickstart runs the test for the quickstart example
 func RunDependencies(f *customFactory) error {

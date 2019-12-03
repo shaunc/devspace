@@ -19,7 +19,7 @@ import (
 	"k8s.io/helm/pkg/proto/hapi/chart"
 )
 
-// DeploymentTimeout is the timeout to wait for helm to deploy
+// DeploymentTimeout is the timeout to wait for helm to examples
 const DeploymentTimeout = int64(180)
 
 func checkDependencies(ch *chart.Chart, reqs *helmchartutil.Requirements) error {

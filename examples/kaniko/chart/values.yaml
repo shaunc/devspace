@@ -2,7 +2,7 @@ components:
 - name: default
   containers:
   - # Image tag will be automatically updated in runtime
-    # when running devspace deploy or devspace dev
+    # when running devspace examples or devspace dev
     image: devspacecloud/devspace
     # Environment variables
     env: []

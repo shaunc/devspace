@@ -244,7 +244,7 @@ helm:                               # struct   | Options for deploying with Helm
 
 ### `deployments[*].helm.chart`
 ```yaml
-chart:                              # struct   | Chart to deploy
+chart:                              examples
   name: my-chart                    # string   | Path to local chart on filesystem OR chart name for remote chart in helm chart repository
   version: v1.0.1                   # string   | Chart version
   repo: "https://my-repo.tld/"      # string   | Helm chart repository

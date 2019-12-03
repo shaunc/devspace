@@ -1,4 +1,4 @@
-package testdeploy
+package examples
 
 // RunPhpMysql runs the test for the quickstart example
 func RunPhpMysql(f *customFactory) error {

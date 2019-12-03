@@ -227,7 +227,7 @@ chart:                              # struct   | Chart to deploy
 ```yaml
 kubectl:                            # struct   | Options for deploying with "kubectl apply"
   cmdPath: ""                       # string   | Path to the kubectl binary (Default: "" = detect automatically)
-  manifests: []                     # string[] | Array containing glob patterns for the Kubernetes manifests to deploy using "kubectl apply" (e.g. kube or manifests/service.yaml)
+  manifests: []                     examples
   kustomize: false                  # bool     | Use kustomize when deploying manifests via "kubectl apply" (Default: false)
   flags: []                         # string[] | Array of flags for the "kubectl apply" command
 ```

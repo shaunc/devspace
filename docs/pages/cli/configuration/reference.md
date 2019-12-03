@@ -98,7 +98,7 @@ options:                            # struct   | Options for building images
 ```yaml
 deployments:                        # struct[] | Array of deployments
 - name: my-deployment               # string   | Name of the deployment
-  namespace: ""                     # string   | Namespace to deploy to (Default: "" = namespace of the active namespace/Space)
+  namespace: ""                     examples
   component: ...                    # struct   | Deploy a DevSpace component chart using helm
   helm: ...                         # struct   | Use Helm as deployment tool and set options for Helm
   kubectl: ...                      # struct   | Use "kubectl apply" as deployment tool and set options for kubectl
@@ -258,7 +258,7 @@ chart:                              # struct   | Chart to deploy
 ### `deployments[*].kubectl`
 ```yaml
 kubectl:                            # struct   | Options for deploying with "kubectl apply"
-  manifests: []                     # string[] | Array containing glob patterns for the Kubernetes manifests to deploy using "kubectl apply" (e.g. kube or manifests/service.yaml)
+  manifests: []                     examples
   kustomize: false                  # bool     | Use kustomize when deploying manifests via "kubectl apply" (Default: false)
   replaceImageTags: true            # bool     | Enable automated tag replacement (Default: true)
   flags: []                         # string[] | Array of flags for the "kubectl apply" command
@@ -366,10 +366,10 @@ dependencies:                       # struct[]  | Array of dependencies (other p
     tag: v1.2.3                     # string    | Git tag to checkout
     revision: ac66e49               # string    | Git revision (commit has) to checkout
     path: ../../my-projects/repo    # string    | Path to a project on your local computer (not recommended, instead of using git-related options)
-  profile: default                  # string    | Name of the profile used to deploy this dependency (when multiple prpfiles are defined in the devspace.yaml of the dependency)
+  profile: default                  examples
   skipBuild: false                  # bool      | Do not build images of this dependency (= only start deployments)
-  ignoreDependencies: false         # bool      | Do not build and deploy dependencies of this dependency
-  namespace: ""                     # string    | Kubernetes namespace to deploy dependency to (Default: default namespace of current kube-context)
+  ignoreDependencies: false         examples
+  namespace: ""                     examples
 ```
 > You **cannot** use `source.git` and `source.path` in combination. You **must** exactly use one of the two.
 

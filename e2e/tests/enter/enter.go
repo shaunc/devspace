@@ -1,7 +1,6 @@
-package testenter
+package enter
 
 import (
-	"fmt"
 	"github.com/devspace-cloud/devspace/cmd"
 	"github.com/devspace-cloud/devspace/cmd/flags"
 	"github.com/devspace-cloud/devspace/e2e/utils"
@@ -12,6 +11,7 @@ import (
 	dockertypes "github.com/docker/docker/api/types"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"strings"
 )
 
 type customFactory struct {
@@ -38,9 +38,7 @@ func (c *customFactory) GetLog() log.Logger {
 
 func TestEnter(pwd string, ns string) {
 	err := runTest(pwd, ns)
-	if err != nil {
-		utils.PrintTestResult("Enter Test", err)
-	}
+	utils.PrintTestResult("Enter Test", err)
 }
 
 func runTest(pwd string, ns string) error {
@@ -61,6 +59,7 @@ func runTest(pwd string, ns string) error {
 		GlobalFlags: &flags.GlobalFlags{
 			Namespace: ns,
 			NoWarn:    true,
+			Silent:    true,
 		},
 		Wait: true,
 	}
@@ -97,9 +96,21 @@ func runTest(pwd string, ns string) error {
 
 	enterConfig.Pod = pods.Items[0].Name
 
-	err = enterConfig.Run(f, nil, []string{"echo", "blabla"})
+	done := utils.Capture()
+
+	output := "testblabla"
+	err = enterConfig.Run(f, nil, []string{"echo", output})
 	if err != nil {
 		return err
+	}
+
+	capturedOutput, err := done()
+	if err != nil {
+		return err
+	}
+
+	if !strings.HasPrefix(capturedOutput, output) {
+		return errors.New("capturedOutput is different than output for the enter cmd")
 	}
 
 	return nil

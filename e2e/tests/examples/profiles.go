@@ -1,4 +1,4 @@
-package testdeploy
+package examples
 
 import (
 	"github.com/devspace-cloud/devspace/cmd"

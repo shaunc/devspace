@@ -1,6 +1,7 @@
-package testdeploy
+package examples
 
 import (
+	"fmt"
 	"github.com/devspace-cloud/devspace/cmd"
 	"github.com/devspace-cloud/devspace/cmd/flags"
 	"github.com/devspace-cloud/devspace/e2e/utils"
@@ -24,40 +25,40 @@ func (c *customFactory) GetLog() log.Logger {
 	return c.FakeLogger
 }
 
-// TestDeploy starts the tests of the deploy cmd for the examples
-func TestDeploy(ns string, pwd string) {
+var availableSubTests = map[string]func(factory *customFactory) error{
+	"quickstart":         RunQuickstart,
+	"kustomize":          RunKustomize,
+	"profiles":           RunProfiles,
+	"microservices":      RunMicroservices,
+	"minikube":           RunMinikube,
+	"quickstart-kubectl": RunQuickstartKubectl,
+	"php-mysql":          RunPhpMysql,
+	"dependencies":       RunDependencies,
+}
+
+func Run(subTests []string, ns string, pwd string) error {
+	// Populates the tests to run with all the available sub tests if no sub tests in specified
+	if len(subTests) == 0 {
+		for subTestName := range availableSubTests {
+			subTests = append(subTests, subTestName)
+		}
+	}
+
 	myFactory := &customFactory{
 		namespace: ns,
 		pwd:       pwd,
 	}
 	myFactory.FakeLogger = fakelog.NewFakeLogger()
 
-	err := RunQuickstart(myFactory)
-	utils.PrintTestResult("Quickstart", err)
+	// Runs the tests
+	for _, subTestName := range subTests {
+		err := availableSubTests[subTestName](myFactory)
+		if err != nil {
+			return err
+		}
+	}
 
-	err = RunKustomize(myFactory)
-	utils.PrintTestResult("Kustomize", err)
-
-	err = RunProfiles(myFactory)
-	utils.PrintTestResult("Profiles", err)
-
-	err = RunMicroservices(myFactory)
-	utils.PrintTestResult("Microservices", err)
-
-	err = RunMinikube(myFactory)
-	utils.PrintTestResult("Minikube", err)
-
-	err = RunQuickstartKubectl(myFactory)
-	utils.PrintTestResult("Quickstart Kubectl", err)
-
-	err = RunPhpMysql(myFactory)
-	utils.PrintTestResult("Php Mysql", err)
-
-	err = RunDependencies(myFactory)
-	utils.PrintTestResult("Dependencies", err)
-
-	//err := RunKaniko(myFactory)
-	//utils.PrintTestResult("Kaniko", err)
+	return nil
 }
 
 func RunTest(f *customFactory, dir string, deployConfig *cmd.DeployCmd) error {
@@ -77,12 +78,13 @@ func RunTest(f *customFactory, dir string, deployConfig *cmd.DeployCmd) error {
 	if err != nil {
 		return err
 	}
-
+	fmt.Println("1")
 	// Create kubectl client
 	client, err := f.NewKubeClientFromContext(deployConfig.KubeContext, deployConfig.Namespace, deployConfig.SwitchContext)
 	if err != nil {
 		return errors.Errorf("Unable to create new kubectl client: %v", err)
 	}
+	fmt.Println("2")
 
 	// At last, we delete the current namespace
 	defer utils.DeleteNamespaceAndWait(client, deployConfig.Namespace)
@@ -91,6 +93,7 @@ func RunTest(f *customFactory, dir string, deployConfig *cmd.DeployCmd) error {
 	if err != nil {
 		return err
 	}
+	fmt.Println("3")
 
 	// Checking if pods are running correctly
 	err = utils.AnalyzePods(client, f.namespace)

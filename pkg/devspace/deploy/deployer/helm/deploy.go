@@ -123,7 +123,7 @@ func (d *DeployConfig) internalDeploy(cache *generated.CacheConfig, forceDeploy 
 		if err == nil {
 			err := yamlutil.ReadYamlFromFile(chartValuesPath, overwriteValues)
 			if err != nil {
-				return false, errors.Errorf("Couldn't deploy chart, error reading from chart values %s: %v", chartValuesPath, err)
+				return false, errors.Errorf("Couldn't examples chart, error reading from chart values %s: %v", chartValuesPath, err)
 			}
 		}
 	}
@@ -171,7 +171,7 @@ func (d *DeployConfig) internalDeploy(cache *generated.CacheConfig, forceDeploy 
 	// Deploy chart
 	appRelease, err := d.Helm.InstallChart(releaseName, releaseNamespace, overwriteValues, d.DeploymentConfig.Helm)
 	if err != nil {
-		return false, errors.Errorf("Unable to deploy helm chart: %v\nRun `%s` and `%s` to recreate the chart", err, ansi.Color("devspace purge -d "+d.DeploymentConfig.Name, "white+b"), ansi.Color("devspace deploy", "white+b"))
+		return false, errors.Errorf("Unable to examples helm chart: %v\nRun `%s` and `%s` to recreate the chart", err, ansi.Color("devspace purge -d "+d.DeploymentConfig.Name, "white+b"), ansi.Color("devspace examples", "white+b"))
 	}
 
 	// Print revision

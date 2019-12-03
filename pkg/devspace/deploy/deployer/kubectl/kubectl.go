@@ -34,13 +34,13 @@ type DeployConfig struct {
 	config *latest.Config
 }
 
-// New creates a new deploy config for kubectl
+// New creates a new examples config for kubectl
 func New(config *latest.Config, kubeClient kubectl.Client, deployConfig *latest.DeploymentConfig, log log.Logger) (deployer.Interface, error) {
 	if deployConfig.Kubectl == nil {
-		return nil, errors.New("Error creating kubectl deploy config: kubectl is nil")
+		return nil, errors.New("Error creating kubectl examples config: kubectl is nil")
 	}
 	if deployConfig.Kubectl.Manifests == nil {
-		return nil, errors.New("No manifests defined for kubectl deploy")
+		return nil, errors.New("No manifests defined for kubectl examples")
 	}
 
 	namespace := kubeClient.Namespace()
@@ -148,7 +148,7 @@ func (d *DeployConfig) Deploy(cache *generated.CacheConfig, forceDeploy bool, bu
 	deploymentConfigHash := hash.String(string(configStr))
 
 	// We force the redeploy of kubectl deployments for now, because we don't know if they are already currently deployed or not,
-	// so it is better to force deploy them, which usually takes almost no time and is better than taking the risk of skipping a needed deployment
+	// so it is better to force examples them, which usually takes almost no time and is better than taking the risk of skipping a needed deployment
 	// forceDeploy = forceDeploy || deployCache.KubectlManifestsHash != manifestsHash || deployCache.DeploymentConfigHash != deploymentConfigHash
 	forceDeploy = true
 

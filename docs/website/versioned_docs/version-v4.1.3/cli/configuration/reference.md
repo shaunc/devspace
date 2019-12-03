@@ -205,7 +205,7 @@ ingress: 	                          # struct   | Component service configuration
 ```yaml
 autoScaling: 	                      # struct   | Auto-Scaling configuration
   horizontal:                       # struct   | Configuration for horizontal auto-scaling
-    maxReplicas: 5                  # int      | Max replicas to deploy
+    maxReplicas: 5                  examples
     averageCPU: 800m                # string   | Target value for CPU usage
     averageMemory: 1Gi              # string   | Target value for memory (RAM) usage
 ```

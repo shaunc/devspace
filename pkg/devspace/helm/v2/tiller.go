@@ -13,7 +13,7 @@ import (
 )
 
 // TillerDeploymentName is the string identifier for the tiller deployment
-const TillerDeploymentName = "tiller-deploy"
+const TillerDeploymentName = "tiller-examples"
 const stableRepoCachePath = "repository/cache/stable-index.yaml"
 const defaultRepositories = `apiVersion: v1
 repositories:
