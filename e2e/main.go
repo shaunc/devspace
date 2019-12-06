@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/devspace-cloud/devspace/e2e/tests/examples"
+	"github.com/devspace-cloud/devspace/e2e/tests/deploy"
 	"github.com/devspace-cloud/devspace/e2e/utils"
 	"os"
 	"strings"
@@ -11,12 +11,12 @@ import (
 
 var testNamespace = "examples-test-namespace"
 
-var tests = map[string]*[]string{
-	"enter":    &[]string{},
-	"deploy":   &[]string{"default", "profile", "kubectl", "helm"},
-	"init":     &[]string{},
-	"examples": &[]string{"quickstart", "kustomize", "profiles", "microservices", "minikube", "quickstart-kubectl", "php-mysql", "dependencies"},
-}
+//var tests = map[string]*[]string{
+//	"enter":    &[]string{},
+//	"deploy":   &[]string{"default", "profile", "kubectl", "helm"},
+//	"init":     &[]string{},
+//	"examples": &[]string{"quickstart", "kustomize", "profiles", "microservices", "minikube", "quickstart-kubectl", "php-mysql", "dependencies"},
+//}
 
 // Create a new type for a list of Strings
 type stringList []string
@@ -31,10 +31,16 @@ func (s *stringList) Set(value string) error {
 	return nil
 }
 
-type Test func(subTests []string, ns string, pwd string) error
+//type Test func(subTests []string, ns string, pwd string) error
+
+type Test interface {
+	Run(subTests []string, ns string, pwd string) error
+	SubTests() []string
+}
 
 var availableTests = map[string]Test{
-	"examples": examples.Run,
+	//"examples": examples.Run,
+	"deploy": deploy.RunNew,
 }
 
 var subTests = map[string]*stringList{}
@@ -92,10 +98,10 @@ func main() {
 		// We gather all the group tests called with the --test flag. e.g: --test=examples,init
 		var testsToRun = map[string]Test{}
 		for _, testName := range test {
-			if tests[testName] == nil {
+			if availableTests[testName] == nil {
 				// arg is not valid
 				fmt.Printf("'%v' is not a valid argument for --test. Valid arguments are the following: [ ", testName)
-				for key := range tests {
+				for key := range availableTests {
 					fmt.Printf("%v ", key)
 				}
 				fmt.Printf("]\n ")
@@ -115,10 +121,10 @@ func main() {
 			parameterSubTests := []string{}
 			if t, ok := subTests[testName]; ok && t != nil && len(*t) > 0 {
 				for _, s := range *t {
-					if !utils.StringInSlice(s, *tests[testName]) {
+					if !utils.StringInSlice(s, testRun.SubTests()) {
 						// arg is not valid
 						fmt.Printf("'%v' is not a valid argument for --test-%v. Valid arguments are the following: [ ", s, testName)
-						for _, st := range *tests[testName] {
+						for _, st := range testRun.SubTests() {
 							fmt.Printf("%v ", st)
 						}
 						fmt.Printf("]\n ")
@@ -129,15 +135,13 @@ func main() {
 			}
 
 			// We run the actual group tests by passing the sub tests
-			err := testRun(parameterSubTests, testNamespace, pwd)
+			err := testRun.Run(parameterSubTests, testNamespace, pwd)
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)
 			}
 		}
 	}
-
-	fmt.Println("End of parsing!")
 
 	//examples.TestDeploy(testNamespace, pwd)
 	//init.TestInit(pwd)
@@ -156,26 +160,26 @@ func main() {
 	deployCmd.Flags().BoolVar(&cmd.ForceDependencies, "force-dependencies", false, "Forces to re-evaluate dependencies (use with --force-build --force-examples to actually force building & deployment of dependencies)")
 	deployCmd.Flags().StringVar(&cmd.Deployments, "deployments", "", "Only examples a specifc deployment (You can specify multiple deployments comma-separated")
 
-Test 1 - default
-1. examples (without profile & var)
-2. examples --force-build & check if rebuild
-3. examples --force-examples & check NO build but deployed
-4. examples --force-dependencies & check NO build & check NO deployment but dependencies are deployed
-5. examples --force-examples --deployments=test1,test2 & check NO build & only deployments deployed
+//Test 1 - default
+//1. deploy (without profile & var)
+//2. deploy --force-build & check if rebuild
+//3. deploy --force-deploy & check NO build but deployed
+//4. deploy --force-dependencies & check NO build & check NO deployment but dependencies are deployed
+//5. deploy --force-deploy --deployments=test1,test2 & check NO build & only deployments deployed
 
 Test 2 - profile
-1. examples --profile=bla --var var1=two --var var2=three
-2. examples --profile=bla --var var1=two --var var2=three --force-build & check if rebuild
-3. examples --profile=bla --var var1=two --var var2=three --force-examples & check NO build but deployed
-4. examples --profile=bla --var var1=two --var var2=three --force-dependencies & check NO build & check NO deployment but dependencies are deployed
-4. examples --profile=bla --var var1=two --var var2=three --force-examples --deployments=test1,test2 & check NO build & only deployments deployed
+1. deploy --profile=bla --var var1=two --var var2=three
+2. deploy --profile=bla --var var1=two --var var2=three --force-build & check if rebuild
+3. deploy --profile=bla --var var1=two --var var2=three --force-deploy & check NO build but deployed
+4. deploy --profile=bla --var var1=two --var var2=three --force-dependencies & check NO build & check NO deployment but dependencies are deployed
+4. deploy --profile=bla --var var1=two --var var2=three --force-deploy --deployments=test1,test2 & check NO build & only deployments deployed
 
 Test 3 - kubectl
-1. examples & kubectl (see quickstart-kubectl)
+1. deploy & kubectl (see quickstart-kubectl)
 2. purge (check if everything is deleted except namespace)
 
 Test 4 - helm
-1. examples & helm (see quickstart) (v1beta5 no tiller)
+1. deploy & helm (see quickstart) (v1beta5 no tiller)
 2. purge (check if everything is deleted except namespace)
 
 Test 1

@@ -1,7 +1,6 @@
 package examples
 
 import (
-	"fmt"
 	"github.com/devspace-cloud/devspace/cmd"
 	"github.com/devspace-cloud/devspace/cmd/flags"
 	"github.com/devspace-cloud/devspace/e2e/utils"
@@ -53,6 +52,7 @@ func Run(subTests []string, ns string, pwd string) error {
 	// Runs the tests
 	for _, subTestName := range subTests {
 		err := availableSubTests[subTestName](myFactory)
+		utils.PrintTestResult("examples", subTestName, err)
 		if err != nil {
 			return err
 		}
@@ -78,13 +78,11 @@ func RunTest(f *customFactory, dir string, deployConfig *cmd.DeployCmd) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("1")
 	// Create kubectl client
 	client, err := f.NewKubeClientFromContext(deployConfig.KubeContext, deployConfig.Namespace, deployConfig.SwitchContext)
 	if err != nil {
 		return errors.Errorf("Unable to create new kubectl client: %v", err)
 	}
-	fmt.Println("2")
 
 	// At last, we delete the current namespace
 	defer utils.DeleteNamespaceAndWait(client, deployConfig.Namespace)
@@ -93,7 +91,6 @@ func RunTest(f *customFactory, dir string, deployConfig *cmd.DeployCmd) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("3")
 
 	// Checking if pods are running correctly
 	err = utils.AnalyzePods(client, f.namespace)

@@ -41,16 +41,14 @@ func ChangeWorkingDir(pwd string) error {
 }
 
 // PrintTestResult prints a test result with a specific formatting
-func PrintTestResult(name string, err error) {
-	log := logger.GetInstance()
-
+func PrintTestResult(testName string, subTestName string, err error) {
 	successIcon := html.UnescapeString("&#" + strconv.Itoa(128513) + ";")
 	failureIcon := html.UnescapeString("&#" + strconv.Itoa(128545) + ";")
 
 	if err == nil {
-		fmt.Printf("%v  %v successfully deployed!\n", successIcon, name)
+		fmt.Printf("%v  Test '%v' of group test '%v' successfully passed!\n", successIcon, subTestName, testName)
 	} else {
-		log.Fatalf("%v  %v failed to examples: %v\n", failureIcon, name, err)
+		fmt.Printf("%v  Test '%v' of group test '%v' failed!\n", failureIcon, subTestName, testName)
 	}
 }
 
@@ -110,7 +108,7 @@ func PortForwardAndPing(servicesClient services.Client) error {
 			if resp.StatusCode == 200 {
 				log.Donef("Pinging %v: status code 200", url)
 			} else {
-				return fmt.Errorf("Pinging %v: status code %v", url, resp.StatusCode)
+				return fmt.Errorf("pinging %v: status code %v", url, resp.StatusCode)
 			}
 		}
 	}
@@ -309,4 +307,33 @@ func StringInSlice(str string, list []string) bool {
 		}
 	}
 	return false
+}
+
+// DeleteTempAndResetWorkingDir deletes /tmp dir and reinitialize the working dir
+func DeleteTempAndResetWorkingDir(tmpDir string, pwd string) {
+	DeleteTempDir(tmpDir)
+	_ = ChangeWorkingDir(pwd)
+}
+
+// LookForDeployment search for a specific deployment name among the deployments, returns true if found
+func LookForDeployment(client kubectl.Client, namespace string, expectedDeployment ...string) (bool, error) {
+	s, err := client.KubeClient().CoreV1().Secrets(namespace).List(metav1.ListOptions{})
+	if err != nil {
+		return false, err
+	}
+
+	var deployments []string
+
+	for _, x := range s.Items {
+		deployments = append(deployments, x.Name)
+	}
+
+	for _, d := range expectedDeployment {
+		exists := StringInSlice(d, deployments)
+		if !exists {
+			return false, nil
+		}
+	}
+
+	return true, nil
 }
