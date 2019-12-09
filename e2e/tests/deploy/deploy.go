@@ -1,6 +1,7 @@
 package deploy
 
 import (
+	"github.com/devspace-cloud/devspace/cmd"
 	"github.com/devspace-cloud/devspace/e2e/utils"
 	"github.com/devspace-cloud/devspace/pkg/devspace/build"
 	"github.com/devspace-cloud/devspace/pkg/devspace/config/generated"
@@ -11,6 +12,14 @@ import (
 	fakelog "github.com/devspace-cloud/devspace/pkg/util/log/testing"
 	"github.com/pkg/errors"
 )
+
+type testSuite []test
+
+type test struct {
+	name         string
+	deployConfig *cmd.DeployCmd
+	postCheck    func(f *customFactory, t *test) error
+}
 
 type customFactory struct {
 	*factory.DefaultFactoryImpl
@@ -55,7 +64,7 @@ func (r *Runner) SubTests() []string {
 
 var availableSubTests = map[string]func(factory *customFactory) error{
 	"default": RunDefault,
-	//"profile":        RunProfile,
+	"profile": RunProfile,
 	//"kubectl":        RunKubectl,
 	//"helm":      		RunHelm,
 }

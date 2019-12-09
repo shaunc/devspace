@@ -15,16 +15,7 @@ import (
 //2. deploy --force-build & check if rebuild
 //3. deploy --force-deploy & check NO build but deployed
 //4. deploy --force-dependencies & check NO build & check NO deployment but dependencies are deployed
-//5. deploy --force-deploy --deployments=test1,test2 & check NO build & only deployments deployed
-
-type testSuite []test
-
-type test struct {
-	name         string
-	dir          string
-	deployConfig *cmd.DeployCmd
-	postCheck    func(f *customFactory, t *test) error
-}
+//5. deploy --force-deploy --deployments=default,test2 & check NO build & only deployments deployed
 
 // RunDefault runs the test for the default deploy test
 func RunDefault(f *customFactory) error {
@@ -33,7 +24,6 @@ func RunDefault(f *customFactory) error {
 	ts := testSuite{
 		test{
 			name: "1. deploy (without profile & var)",
-			dir:  "/tests/deploy/testdata/test1",
 			deployConfig: &cmd.DeployCmd{
 				GlobalFlags: &flags.GlobalFlags{
 					Namespace: f.namespace,
@@ -51,7 +41,6 @@ func RunDefault(f *customFactory) error {
 		},
 		test{
 			name: "2. deploy --force-build & check if rebuild",
-			dir:  "/tests/deploy/testdata/test1",
 			deployConfig: &cmd.DeployCmd{
 				GlobalFlags: &flags.GlobalFlags{
 					Namespace: f.namespace,
@@ -71,7 +60,6 @@ func RunDefault(f *customFactory) error {
 		},
 		test{
 			name: "3. deploy --force-deploy & check NO build but deployed",
-			dir:  "/tests/deploy/testdata/test1",
 			deployConfig: &cmd.DeployCmd{
 				GlobalFlags: &flags.GlobalFlags{
 					Namespace: f.namespace,
@@ -104,7 +92,6 @@ func RunDefault(f *customFactory) error {
 		},
 		test{
 			name: "4. deploy --force-dependencies & check NO build & check NO deployment but dependencies are deployed",
-			dir:  "/tests/deploy/testdata/test1",
 			deployConfig: &cmd.DeployCmd{
 				GlobalFlags: &flags.GlobalFlags{
 					Namespace: f.namespace,
@@ -139,8 +126,7 @@ func RunDefault(f *customFactory) error {
 			},
 		},
 		test{
-			name: "5. deploy --force-deploy --deployments=test1,test2 & check NO build & only deployments deployed",
-			dir:  "/tests/deploy/testdata/test1",
+			name: "5. deploy --force-deploy --deployments=default,test2 & check NO build & only deployments deployed",
 			deployConfig: &cmd.DeployCmd{
 				GlobalFlags: &flags.GlobalFlags{
 					Namespace: f.namespace,
@@ -194,7 +180,7 @@ func RunDefault(f *customFactory) error {
 	// At last, we delete the current namespace
 	defer utils.DeleteNamespaceAndWait(client, f.namespace)
 
-	testDir := filepath.FromSlash("tests/deploy/testdata/test1")
+	testDir := filepath.FromSlash("tests/deploy/testdata/default")
 
 	dirPath, _, err := utils.CreateTempDir()
 	if err != nil {

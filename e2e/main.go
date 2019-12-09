@@ -165,14 +165,14 @@ func main() {
 //2. deploy --force-build & check if rebuild
 //3. deploy --force-deploy & check NO build but deployed
 //4. deploy --force-dependencies & check NO build & check NO deployment but dependencies are deployed
-//5. deploy --force-deploy --deployments=test1,test2 & check NO build & only deployments deployed
+//5. deploy --force-deploy --deployments=default,test2 & check NO build & only deployments deployed
 
 Test 2 - profile
 1. deploy --profile=bla --var var1=two --var var2=three
 2. deploy --profile=bla --var var1=two --var var2=three --force-build & check if rebuild
 3. deploy --profile=bla --var var1=two --var var2=three --force-deploy & check NO build but deployed
 4. deploy --profile=bla --var var1=two --var var2=three --force-dependencies & check NO build & check NO deployment but dependencies are deployed
-4. deploy --profile=bla --var var1=two --var var2=three --force-deploy --deployments=test1,test2 & check NO build & only deployments deployed
+4. deploy --profile=bla --var var1=two --var var2=three --force-deploy --deployments=default,test2 & check NO build & only deployments deployed
 
 Test 3 - kubectl
 1. deploy & kubectl (see quickstart-kubectl)
