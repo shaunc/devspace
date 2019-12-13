@@ -30,10 +30,9 @@ type initTestCase struct {
 
 type customFactory struct {
 	*factory.DefaultFactoryImpl
-
+	namespace  string
+	pwd        string
 	FakeLogger *fakelog.FakeLogger
-	// Config          *latest.Config
-	// GeneratedConfig *generated.Config
 }
 
 // func (c *customFactory) NewConfigLoader(options *loader.ConfigOptions, log log.Logger) loader.ConfigLoader {
@@ -56,25 +55,51 @@ func (c *customFactory) GetLog() log.Logger {
 	return c.FakeLogger
 }
 
-// TestInit runs the e2e tests for the init cmd
-func TestInit(pwd string) {
-	myFactory := &customFactory{}
+var availableSubTests = map[string]func(factory *customFactory) error{
+	"create_dockerfile":       CreateDockerfile,
+	"use_existing_dockerfile": UseExistingDockerfile,
+	"use_dockerfile":          UseDockerfile,
+	"use_manifests":           UseManifests,
+	"use_chart":               UseChart,
+}
+
+type Runner struct{}
+
+var RunNew = &Runner{}
+
+func (r *Runner) SubTests() []string {
+	subTests := []string{}
+	for k := range availableSubTests {
+		subTests = append(subTests, k)
+	}
+
+	return subTests
+}
+
+func (r *Runner) Run(subTests []string, ns string, pwd string) error {
+	// Populates the tests to run with all the available sub tests if no sub tests is specified
+	if len(subTests) == 0 {
+		for subTestName := range availableSubTests {
+			subTests = append(subTests, subTestName)
+		}
+	}
+
+	myFactory := &customFactory{
+		namespace: ns,
+		pwd:       pwd,
+	}
 	myFactory.FakeLogger = fakelog.NewFakeLogger()
 
-	err := CreateDockerfile(myFactory, pwd)
-	utils.PrintTestResult("Create Dockerfile", err)
+	// Runs the tests
+	for _, subTestName := range subTests {
+		err := availableSubTests[subTestName](myFactory)
+		utils.PrintTestResult("init", subTestName, err)
+		if err != nil {
+			return err
+		}
+	}
 
-	err = UseExistingDockerfile(myFactory, pwd)
-	utils.PrintTestResult("Use Existing Dockerfile", err)
-
-	err = UseDockerfile(myFactory, pwd)
-	utils.PrintTestResult("Use Dockerfile", err)
-
-	err = UseManifests(myFactory, pwd)
-	utils.PrintTestResult("Use Kubectl Manifests", err)
-
-	err = UseChart(myFactory, pwd)
-	utils.PrintTestResult("Use Helm Chart", err)
+	return nil
 }
 
 func initializeTest(f *customFactory, testCase initTestCase) error {

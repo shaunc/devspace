@@ -35,7 +35,20 @@ var availableSubTests = map[string]func(factory *customFactory) error{
 	"dependencies":       RunDependencies,
 }
 
-func Run(subTests []string, ns string, pwd string) error {
+type Runner struct{}
+
+var RunNew = &Runner{}
+
+func (r *Runner) SubTests() []string {
+	subTests := []string{}
+	for k := range availableSubTests {
+		subTests = append(subTests, k)
+	}
+
+	return subTests
+}
+
+func (r *Runner) Run(subTests []string, ns string, pwd string) error {
 	// Populates the tests to run with all the available sub tests if no sub tests in specified
 	if len(subTests) == 0 {
 		for subTestName := range availableSubTests {

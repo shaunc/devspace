@@ -4,31 +4,17 @@ import (
 	"github.com/devspace-cloud/devspace/cmd"
 	"github.com/devspace-cloud/devspace/cmd/flags"
 	"github.com/devspace-cloud/devspace/e2e/utils"
-	"github.com/devspace-cloud/devspace/pkg/devspace/docker"
 	"github.com/devspace-cloud/devspace/pkg/util/factory"
 	"github.com/devspace-cloud/devspace/pkg/util/log"
 	fakelog "github.com/devspace-cloud/devspace/pkg/util/log/testing"
-	dockertypes "github.com/docker/docker/api/types"
 	"github.com/pkg/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"strings"
 )
 
 type customFactory struct {
 	*factory.DefaultFactoryImpl
-
+	namespace  string
+	pwd        string
 	FakeLogger *fakelog.FakeLogger
-}
-
-// NewDockerClient implements interface
-func (c *customFactory) NewDockerClient(log log.Logger) (docker.Client, error) {
-	fakeDockerClient := &docker.FakeClient{
-		AuthConfig: &dockertypes.AuthConfig{
-			Username: "user",
-			Password: "pass",
-		},
-	}
-	return fakeDockerClient, nil
 }
 
 // GetLog implements interface
@@ -36,13 +22,35 @@ func (c *customFactory) GetLog() log.Logger {
 	return c.FakeLogger
 }
 
-func TestEnter(pwd string, ns string) {
-	err := runTest(pwd, ns)
-	utils.PrintTestResult("Enter Test", err)
+type Runner struct{}
+
+var RunNew = &Runner{}
+
+func (r *Runner) SubTests() []string {
+	subTests := []string{}
+	for k := range availableSubTests {
+		subTests = append(subTests, k)
+	}
+
+	return subTests
 }
 
-func runTest(pwd string, ns string) error {
-	f := &customFactory{}
+var availableSubTests = map[string]func(factory *customFactory) error{
+	"default": runDefault,
+}
+
+func (r *Runner) Run(subTests []string, ns string, pwd string) error {
+	// Populates the tests to run with all the available sub tests if no sub tests are specified
+	if len(subTests) == 0 {
+		for subTestName := range availableSubTests {
+			subTests = append(subTests, subTestName)
+		}
+	}
+
+	f := &customFactory{
+		namespace: ns,
+		pwd:       pwd,
+	}
 	f.FakeLogger = fakelog.NewFakeLogger()
 
 	deployConfig := &cmd.DeployCmd{
@@ -55,19 +63,22 @@ func runTest(pwd string, ns string) error {
 		SkipPush:    true,
 	}
 
-	enterConfig := &cmd.EnterCmd{
-		GlobalFlags: &flags.GlobalFlags{
-			Namespace: ns,
-			NoWarn:    true,
-			Silent:    true,
-		},
-		Wait: true,
-	}
-
-	err := utils.ChangeWorkingDir(pwd + "/../examples/quickstart")
+	dirPath, _, err := utils.CreateTempDir()
 	if err != nil {
 		return err
 	}
+
+	err = utils.Copy(f.pwd+"/tests/enter/testdata", dirPath)
+	if err != nil {
+		return err
+	}
+
+	err = utils.ChangeWorkingDir(dirPath)
+	if err != nil {
+		return err
+	}
+
+	defer utils.DeleteTempAndResetWorkingDir(dirPath, f.pwd)
 
 	// Create kubectl client
 	client, err := f.NewKubeClientFromContext(deployConfig.KubeContext, deployConfig.Namespace, deployConfig.SwitchContext)
@@ -75,7 +86,6 @@ func runTest(pwd string, ns string) error {
 		return errors.Errorf("Unable to create new kubectl client: %v", err)
 	}
 
-	// At last, we delete the current namespace
 	defer utils.DeleteNamespaceAndWait(client, deployConfig.Namespace)
 
 	err = deployConfig.Run(f, nil, nil)
@@ -89,28 +99,13 @@ func runTest(pwd string, ns string) error {
 		return err
 	}
 
-	pods, err := client.KubeClient().CoreV1().Pods(ns).List(metav1.ListOptions{})
-	if err != nil {
-		return err
-	}
-
-	enterConfig.Pod = pods.Items[0].Name
-
-	done := utils.Capture()
-
-	output := "testblabla"
-	err = enterConfig.Run(f, nil, []string{"echo", output})
-	if err != nil {
-		return err
-	}
-
-	capturedOutput, err := done()
-	if err != nil {
-		return err
-	}
-
-	if !strings.HasPrefix(capturedOutput, output) {
-		return errors.New("capturedOutput is different than output for the enter cmd")
+	// Runs the tests
+	for _, subTestName := range subTests {
+		err := availableSubTests[subTestName](f)
+		utils.PrintTestResult("enter", subTestName, err)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

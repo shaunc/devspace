@@ -2,6 +2,7 @@ package deploy
 
 import (
 	"github.com/devspace-cloud/devspace/cmd"
+	"github.com/devspace-cloud/devspace/cmd/flags"
 	"github.com/devspace-cloud/devspace/e2e/utils"
 	"github.com/devspace-cloud/devspace/pkg/devspace/build"
 	"github.com/devspace-cloud/devspace/pkg/devspace/config/generated"
@@ -11,6 +12,8 @@ import (
 	"github.com/devspace-cloud/devspace/pkg/util/log"
 	fakelog "github.com/devspace-cloud/devspace/pkg/util/log/testing"
 	"github.com/pkg/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"time"
 )
 
 type testSuite []test
@@ -65,8 +68,8 @@ func (r *Runner) SubTests() []string {
 var availableSubTests = map[string]func(factory *customFactory) error{
 	"default": RunDefault,
 	"profile": RunProfile,
-	//"kubectl":        RunKubectl,
-	//"helm":      		RunHelm,
+	"kubectl": RunKubectl,
+	"helm":    RunHelm,
 }
 
 func (r *Runner) Run(subTests []string, ns string, pwd string) error {
@@ -128,4 +131,34 @@ func runTest(f *customFactory, t *test) error {
 	}
 
 	return nil
+}
+
+func testPurge(f *customFactory) error {
+	purgeCmd := &cmd.PurgeCmd{
+		GlobalFlags: &flags.GlobalFlags{
+			Namespace: f.namespace,
+			NoWarn:    true,
+		},
+	}
+
+	err := purgeCmd.Run(f, nil, nil)
+	if err != nil {
+		return err
+	}
+
+	client, err := f.NewKubeClientFromContext("", f.namespace, false)
+	if err != nil {
+		return errors.Errorf("Unable to create new kubectl client: %v", err)
+	}
+
+	for start := time.Now(); time.Since(start) < time.Second*60; {
+		p, _ := client.KubeClient().CoreV1().Pods(f.namespace).List(metav1.ListOptions{})
+
+		if len(p.Items) == 0 {
+			return nil
+		}
+	}
+
+	p, _ := client.KubeClient().CoreV1().Pods(f.namespace).List(metav1.ListOptions{})
+	return errors.Errorf("purge command failed, expected 0 pod but found %v", len(p.Items))
 }

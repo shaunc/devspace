@@ -108,7 +108,7 @@ func BuildRoot(f factory.Factory) *cobra.Command {
 	rootCmd.AddCommand(NewDevCmd(globalFlags))
 	rootCmd.AddCommand(NewBuildCmd(globalFlags))
 	rootCmd.AddCommand(NewSyncCmd(globalFlags))
-	rootCmd.AddCommand(NewPurgeCmd(globalFlags))
+	rootCmd.AddCommand(NewPurgeCmd(f, globalFlags))
 	rootCmd.AddCommand(NewUpgradeCmd())
 	rootCmd.AddCommand(NewDeployCmd(f, globalFlags))
 	rootCmd.AddCommand(NewEnterCmd(f, globalFlags))
@@ -117,7 +117,7 @@ func BuildRoot(f factory.Factory) *cobra.Command {
 	rootCmd.AddCommand(NewLogsCmd(globalFlags))
 	rootCmd.AddCommand(NewOpenCmd(globalFlags))
 	rootCmd.AddCommand(NewUICmd(globalFlags))
-	rootCmd.AddCommand(NewRunCmd(globalFlags))
+	rootCmd.AddCommand(NewRunCmd(f, globalFlags))
 	rootCmd.AddCommand(NewAttachCmd(globalFlags))
 
 	cobra.OnInitialize(func() { initConfig(f.GetLog()) })

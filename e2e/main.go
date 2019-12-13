@@ -4,19 +4,17 @@ import (
 	"flag"
 	"fmt"
 	"github.com/devspace-cloud/devspace/e2e/tests/deploy"
+	"github.com/devspace-cloud/devspace/e2e/tests/enter"
+	"github.com/devspace-cloud/devspace/e2e/tests/examples"
+	initTest "github.com/devspace-cloud/devspace/e2e/tests/init"
+	"github.com/devspace-cloud/devspace/e2e/tests/logs"
+	"github.com/devspace-cloud/devspace/e2e/tests/sync"
 	"github.com/devspace-cloud/devspace/e2e/utils"
 	"os"
 	"strings"
 )
 
 var testNamespace = "examples-test-namespace"
-
-//var tests = map[string]*[]string{
-//	"enter":    &[]string{},
-//	"deploy":   &[]string{"default", "profile", "kubectl", "helm"},
-//	"init":     &[]string{},
-//	"examples": &[]string{"quickstart", "kustomize", "profiles", "microservices", "minikube", "quickstart-kubectl", "php-mysql", "dependencies"},
-//}
 
 // Create a new type for a list of Strings
 type stringList []string
@@ -39,8 +37,12 @@ type Test interface {
 }
 
 var availableTests = map[string]Test{
-	//"examples": examples.Run,
-	"deploy": deploy.RunNew,
+	"examples": examples.RunNew,
+	"deploy":   deploy.RunNew,
+	"init":     initTest.RunNew,
+	"enter":    enter.RunNew,
+	"sync":     sync.RunNew,
+	"logs":     logs.RunNew,
 }
 
 var subTests = map[string]*stringList{}
@@ -142,57 +144,7 @@ func main() {
 			}
 		}
 	}
-
-	//examples.TestDeploy(testNamespace, pwd)
-	//init.TestInit(pwd)
-	//enter.TestEnter(pwd, testNamespace)
 }
 
 // go run . test --test=bla --test-examples --test-enter
 // go run . list --test=examples
-
-/*
-	flags.StringVarP(&globalFlags.Profile, "profile", "p", "", "The devspace profile to use (if there is any)")
-	flags.StringSliceVar(&globalFlags.Vars, "var", []string{}, "Variables to override during execution (e.g. --var=MYVAR=MYVALUE)")
-
-	deployCmd.Flags().BoolVarP(&cmd.ForceBuild, "force-build", "b", false, "Forces to (re-)build every image")
-	deployCmd.Flags().BoolVarP(&cmd.ForceDeploy, "force-examples", "d", false, "Forces to (re-)examples every deployment")
-	deployCmd.Flags().BoolVar(&cmd.ForceDependencies, "force-dependencies", false, "Forces to re-evaluate dependencies (use with --force-build --force-examples to actually force building & deployment of dependencies)")
-	deployCmd.Flags().StringVar(&cmd.Deployments, "deployments", "", "Only examples a specifc deployment (You can specify multiple deployments comma-separated")
-
-//Test 1 - default
-//1. deploy (without profile & var)
-//2. deploy --force-build & check if rebuild
-//3. deploy --force-deploy & check NO build but deployed
-//4. deploy --force-dependencies & check NO build & check NO deployment but dependencies are deployed
-//5. deploy --force-deploy --deployments=default,test2 & check NO build & only deployments deployed
-
-Test 2 - profile
-1. deploy --profile=bla --var var1=two --var var2=three
-2. deploy --profile=bla --var var1=two --var var2=three --force-build & check if rebuild
-3. deploy --profile=bla --var var1=two --var var2=three --force-deploy & check NO build but deployed
-4. deploy --profile=bla --var var1=two --var var2=three --force-dependencies & check NO build & check NO deployment but dependencies are deployed
-4. deploy --profile=bla --var var1=two --var var2=three --force-deploy --deployments=default,test2 & check NO build & only deployments deployed
-
-Test 3 - kubectl
-1. deploy & kubectl (see quickstart-kubectl)
-2. purge (check if everything is deleted except namespace)
-
-Test 4 - helm
-1. deploy & helm (see quickstart) (v1beta5 no tiller)
-2. purge (check if everything is deleted except namespace)
-
-Test 1
-	enterCmd.Flags().StringVarP(&cmd.Container, "container", "c", "", "Container name within pod where to execute command")
-	enterCmd.Flags().StringVar(&cmd.Pod, "pod", "", "Pod to open a shell to")
-	enterCmd.Flags().StringVarP(&cmd.LabelSelector, "label-selector", "l", "", "Comma separated key=value selector list (e.g. release=test)")
-	enterCmd.Flags().BoolVar(&cmd.Pick, "pick", false, "Select a pod")
-
-1. enter --container
-2. enter --pod
-3. enter --label-selector
-4. enter --pick
-
-*/
-
-// enter test with label selector

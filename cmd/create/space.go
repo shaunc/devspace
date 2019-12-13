@@ -15,14 +15,14 @@ import (
 // DevSpaceCloudHostedCluster is the option that is shown during cluster select to select the hosted devspace cloud clusters
 const DevSpaceCloudHostedCluster = "Clusters managed by DevSpace"
 
-type spaceCmd struct {
+type SpaceCmd struct {
 	Active   bool
 	Provider string
 	Cluster  string
 }
 
 func newSpaceCmd() *cobra.Command {
-	cmd := &spaceCmd{}
+	cmd := &SpaceCmd{}
 
 	spaceCmd := &cobra.Command{
 		Use:   "space",
@@ -49,7 +49,7 @@ devspace create space myspace
 }
 
 // RunCreateSpace executes the "devspace create space" command logic
-func (cmd *spaceCmd) RunCreateSpace(cobraCmd *cobra.Command, args []string) error {
+func (cmd *SpaceCmd) RunCreateSpace(cobraCmd *cobra.Command, args []string) error {
 	// Set config root
 	log := log.GetInstance()
 	configLoader := loader.NewConfigLoader(nil, log)
