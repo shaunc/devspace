@@ -2,8 +2,8 @@ components:
 - name: default
   containers:
   - # Image tag will be automatically updated in runtime
-    # when running devspace examples or devspace dev
-    image: devspacecloud/devspace
+    # when running devspace deploy or devspace dev
+    image: yourdockeruser/devspace
     # Environment variables
     env: []
     # Mount volumes in this container

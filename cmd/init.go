@@ -31,12 +31,12 @@ const configDockerignore = "\n\n# Ignore devspace.yaml file to prevent image reb
 
 const (
 	// Dockerfile not found options
-	UseExistingDockerfileOption = "Use the Dockerfile in ./Dockerfile"
-	CreateDockerfileOption      = "Create a Dockerfile for me"
-	EnterDockerfileOption       = "Enter path to your Dockerfile"
-	EnterManifestsOption        = "Enter path to your Kubernetes manifests"
-	EnterHelmChartOption        = "Enter path to your Helm chart"
-	UseExistingImageOption      = "Use existing image (e.g. from Docker Hub)"
+	useExistingDockerfileOption = "Use the Dockerfile in ./Dockerfile"
+	createDockerfileOption      = "Create a Dockerfile for me"
+	enterDockerfileOption       = "Enter path to your Dockerfile"
+	enterManifestsOption        = "Enter path to your Kubernetes manifests"
+	enterHelmChartOption        = "Enter path to your Helm chart"
+	useExistingImageOption      = "Use existing image (e.g. from Docker Hub)"
 
 	// The default image name in the config
 	defaultImageName = "default"
@@ -88,7 +88,6 @@ folder. Creates a devspace.yaml with all configuration.
 // Run executes the command logic
 func (cmd *InitCmd) Run(f factory.Factory, cobraCmd *cobra.Command, args []string) error {
 	// Check if config already exists
-	cmd.log = f.GetLog()
 	configLoader := f.NewConfigLoader(nil, cmd.log)
 	configExists := configLoader.Exists()
 	if configExists && cmd.Reconfigure == false {
@@ -134,13 +133,13 @@ func (cmd *InitCmd) Run(f factory.Factory, cobraCmd *cobra.Command, args []strin
 	if err != nil {
 		selectedOption, err = cmd.log.Question(&survey.QuestionOptions{
 			Question:     "This project does not have a Dockerfile. What do you want to do?",
-			DefaultValue: CreateDockerfileOption,
+			DefaultValue: createDockerfileOption,
 			Options: []string{
-				CreateDockerfileOption,
-				EnterDockerfileOption,
-				EnterManifestsOption,
-				EnterHelmChartOption,
-				UseExistingImageOption,
+				createDockerfileOption,
+				enterDockerfileOption,
+				enterManifestsOption,
+				enterHelmChartOption,
+				useExistingImageOption,
 			},
 		})
 		if err != nil {
@@ -149,13 +148,13 @@ func (cmd *InitCmd) Run(f factory.Factory, cobraCmd *cobra.Command, args []strin
 	} else {
 		selectedOption, err = cmd.log.Question(&survey.QuestionOptions{
 			Question:     "How do you want to initialize this project?",
-			DefaultValue: UseExistingDockerfileOption,
+			DefaultValue: useExistingDockerfileOption,
 			Options: []string{
-				UseExistingDockerfileOption,
-				EnterDockerfileOption,
-				EnterManifestsOption,
-				EnterHelmChartOption,
-				UseExistingImageOption,
+				useExistingDockerfileOption,
+				enterDockerfileOption,
+				enterManifestsOption,
+				enterHelmChartOption,
+				useExistingImageOption,
 			},
 		})
 		if err != nil {
@@ -163,20 +162,20 @@ func (cmd *InitCmd) Run(f factory.Factory, cobraCmd *cobra.Command, args []strin
 		}
 	}
 
-	if selectedOption == CreateDockerfileOption {
+	if selectedOption == createDockerfileOption {
 		// Containerize application if necessary
 		err = generator.ContainerizeApplication(cmd.Dockerfile, ".", "", cmd.log)
 		if err != nil {
 			return errors.Wrap(err, "containerize application")
 		}
-	} else if selectedOption == EnterDockerfileOption {
+	} else if selectedOption == enterDockerfileOption {
 		cmd.Dockerfile, err = cmd.log.Question(&survey.QuestionOptions{
 			Question: "Please enter a path to your Dockerfile (e.g. ./MyDockerfile)",
 		})
 		if err != nil {
 			return err
 		}
-	} else if selectedOption == EnterManifestsOption {
+	} else if selectedOption == enterManifestsOption {
 		addFromDockerfile = false
 		manifests, err := cmd.log.Question(&survey.QuestionOptions{
 			Question: "Please enter Kubernetes manifests to deploy (glob pattern are allowed, comma separated, e.g. 'manifests/**' or 'kube/pod.yaml')",
@@ -189,7 +188,7 @@ func (cmd *InitCmd) Run(f factory.Factory, cobraCmd *cobra.Command, args []strin
 		if err != nil {
 			return err
 		}
-	} else if selectedOption == EnterHelmChartOption {
+	} else if selectedOption == enterHelmChartOption {
 		addFromDockerfile = false
 		chartName, err := cmd.log.Question(&survey.QuestionOptions{
 			Question: "Please enter the path to a helm chart to deploy (e.g. ./chart)",
@@ -202,7 +201,7 @@ func (cmd *InitCmd) Run(f factory.Factory, cobraCmd *cobra.Command, args []strin
 		if err != nil {
 			return err
 		}
-	} else if selectedOption == UseExistingImageOption {
+	} else if selectedOption == useExistingImageOption {
 		addFromDockerfile = false
 		existingImageName, err := cmd.log.Question(&survey.QuestionOptions{
 			Question: "Please enter a docker image to deploy (e.g. gcr.io/myuser/myrepo or dockeruser/repo:0.1 or mysql:latest)",

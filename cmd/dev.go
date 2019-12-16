@@ -102,9 +102,9 @@ Open terminal instead of logs:
 	devCmd.Flags().BoolVar(&cmd.SkipBuild, "skip-build", false, "Skips building of images")
 	devCmd.Flags().BoolVar(&cmd.BuildSequential, "build-sequential", false, "Builds the images one after another instead of in parallel")
 
-	devCmd.Flags().BoolVarP(&cmd.ForceDeploy, "force-examples", "d", false, "Forces to examples every deployment")
-	devCmd.Flags().StringVar(&cmd.Deployments, "deployments", "", "Only examples a specifc deployment (You can specify multiple deployments comma-separated")
-	devCmd.Flags().BoolVar(&cmd.ForceDependencies, "force-dependencies", false, "Forces to re-evaluate dependencies (use with --force-build --force-examples to actually force building & deployment of dependencies)")
+	devCmd.Flags().BoolVarP(&cmd.ForceDeploy, "force-deploy", "d", false, "Forces to deploy every deployment")
+	devCmd.Flags().StringVar(&cmd.Deployments, "deployments", "", "Only deploy a specifc deployment (You can specify multiple deployments comma-separated")
+	devCmd.Flags().BoolVar(&cmd.ForceDependencies, "force-dependencies", false, "Forces to re-evaluate dependencies (use with --force-build --force-deploy to actually force building & deployment of dependencies)")
 
 	devCmd.Flags().BoolVarP(&cmd.SkipPipeline, "skip-pipeline", "x", false, "Skips build & deployment and only starts sync, portforwarding & terminal")
 	devCmd.Flags().BoolVar(&cmd.SkipPush, "skip-push", false, "Skips image pushing, useful for minikube deployment")
@@ -116,7 +116,7 @@ Open terminal instead of logs:
 
 	devCmd.Flags().BoolVar(&cmd.Portforwarding, "portforwarding", true, "Enable port forwarding")
 
-	devCmd.Flags().BoolVar(&cmd.ExitAfterDeploy, "exit-after-examples", false, "Exits the command after building the images and deploying the project")
+	devCmd.Flags().BoolVar(&cmd.ExitAfterDeploy, "exit-after-deploy", false, "Exits the command after building the images and deploying the project")
 	devCmd.Flags().BoolVarP(&cmd.Interactive, "interactive", "i", false, "Enable interactive mode for images (overrides entrypoint with sleep command) and start terminal proxy")
 	devCmd.Flags().BoolVarP(&cmd.Terminal, "terminal", "t", false, "Open a terminal instead of showing logs")
 	return devCmd
@@ -207,7 +207,7 @@ func (cmd *DevCmd) Run(cobraCmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// Build and examples images
+	// Build and deploy images
 	exitCode, err := cmd.buildAndDeploy(config, generatedConfig, client, args, true)
 	if err != nil {
 		return err
@@ -348,38 +348,28 @@ func (cmd *DevCmd) startServices(config *latest.Config, generatedConfig *generat
 		}
 	}
 
-	servicesClient := services.NewClient(config, generatedConfig, client, selectorParameter, log)
-	if cmd.Portforwarding {
-		portForwarder, err := servicesClient.StartPortForwarding()
-		if err != nil {
-			return 0, errors.Errorf("Unable to start portforwarding: %v", err)
-		}
-
-		defer func() {
-			for _, v := range portForwarder {
-				v.Close()
-			}
-		}()
-	}
-
-	if cmd.Sync {
-		syncConfigs, err := servicesClient.StartSync(cmd.VerboseSync)
-		if err != nil {
-			return 0, errors.Errorf("Unable to start sync: %v", err)
-		}
-
-		defer func() {
-			for _, v := range syncConfigs {
-				v.Stop(nil)
-			}
-		}()
-	}
-
 	var (
+		servicesClient  = services.NewClient(config, generatedConfig, client, selectorParameter, log)
 		exitChan        = make(chan error)
 		autoReloadPaths = GetPaths(config)
 		interactiveMode = config.Dev != nil && config.Dev.Interactive != nil && config.Dev.Interactive.DefaultEnabled != nil && *config.Dev.Interactive.DefaultEnabled == true
 	)
+
+	if cmd.Portforwarding {
+		cmd.Portforwarding = false
+		err := servicesClient.StartPortForwarding()
+		if err != nil {
+			return 0, errors.Errorf("Unable to start portforwarding: %v", err)
+		}
+	}
+
+	if cmd.Sync {
+		cmd.Sync = false
+		err := servicesClient.StartSync(cmd.VerboseSync)
+		if err != nil {
+			return 0, errors.Wrap(err, "start sync")
+		}
+	}
 
 	// Start watcher if we have at least one auto reload path and if we should not skip the pipeline
 	if cmd.SkipPipeline == false && len(autoReloadPaths) > 0 {
@@ -516,6 +506,7 @@ func (cmd *DevCmd) startServices(config *latest.Config, generatedConfig *generat
 
 			log.Warnf("Couldn't print logs: %v", err)
 		}
+
 		log.WriteString("\n")
 		log.Warn("Log streaming service has been terminated")
 	}
@@ -536,7 +527,7 @@ func (cmd *DevCmd) validateFlags() error {
 func GetPaths(config *latest.Config) []string {
 	paths := make([]string, 0, 1)
 
-	// Add the examples manifest paths
+	// Add the deploy manifest paths
 	if config.Dev != nil && config.Dev.AutoReload != nil {
 		if config.Dev.AutoReload.Deployments != nil && config.Deployments != nil {
 			for _, deployName := range config.Dev.AutoReload.Deployments {
@@ -681,7 +672,7 @@ func (cmd *DevCmd) loadConfig() (*latest.Config, error) {
 }
 
 func updateLastKubeContext(configLoader loader.ConfigLoader, client kubectl.Client, generatedConfig *generated.Config) error {
-	// Update generated if we examples the application
+	// Update generated if we deploy the application
 	if generatedConfig != nil {
 		generatedConfig.GetActive().LastContext = &generated.LastContextConfig{
 			Context:   client.CurrentContext(),
