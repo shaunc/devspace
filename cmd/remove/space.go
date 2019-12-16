@@ -13,14 +13,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type spaceCmd struct {
+type SpaceCmd struct {
 	SpaceID  string
 	Provider string
 	All      bool
 }
 
 func newSpaceCmd() *cobra.Command {
-	cmd := &spaceCmd{}
+	cmd := &SpaceCmd{}
 
 	spaceCmd := &cobra.Command{
 		Use:   "space",
@@ -49,7 +49,7 @@ devspace remove space --all
 }
 
 // RunRemoveCloudDevSpace executes the devspace remove cloud devspace functionality
-func (cmd *spaceCmd) RunRemoveCloudDevSpace(cobraCmd *cobra.Command, args []string) error {
+func (cmd *SpaceCmd) RunRemoveCloudDevSpace(cobraCmd *cobra.Command, args []string) error {
 	// Set config root
 	log := log.GetInstance()
 	configLoader := loader.NewConfigLoader(nil, log)

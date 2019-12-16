@@ -10,9 +10,9 @@ import (
 
 type customFactory struct {
 	*factory.DefaultFactoryImpl
-	namespace  string
-	pwd        string
-	FakeLogger *fakelog.FakeLogger
+	previousContext string
+	pwd             string
+	FakeLogger      *fakelog.FakeLogger
 }
 
 // GetLog implements interface
@@ -46,8 +46,7 @@ func (r *Runner) Run(subTests []string, ns string, pwd string) error {
 	}
 
 	f := &customFactory{
-		namespace: ns,
-		pwd:       pwd,
+		pwd: pwd,
 	}
 	f.FakeLogger = fakelog.NewFakeLogger()
 
@@ -69,12 +68,14 @@ func (r *Runner) Run(subTests []string, ns string, pwd string) error {
 	defer utils.DeleteTempAndResetWorkingDir(dirPath, f.pwd)
 
 	// Create kubectl client
-	client, err := f.NewKubeClientFromContext("", f.namespace, false)
+	client, err := f.NewKubeDefaultClient()
 	if err != nil {
 		return errors.Errorf("Unable to create new kubectl client: %v", err)
 	}
 
-	defer utils.DeleteNamespaceAndWait(client, f.namespace)
+	f.previousContext = client.CurrentContext()
+
+	//defer utils.DeleteNamespaceAndWait(client, f.namespace)
 
 	// Runs the tests
 	for _, subTestName := range subTests {

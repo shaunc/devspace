@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-var testNamespace = "examples-test-namespace"
+var testNamespace = "testing-test-namespace"
 
 // Create a new type for a list of Strings
 type stringList []string
@@ -43,6 +43,7 @@ var availableTests = map[string]Test{
 	"enter":    enter.RunNew,
 	"sync":     sync.RunNew,
 	"logs":     logs.RunNew,
+	//"create_delete_space":     create_delete_space.RunNew,
 }
 
 var subTests = map[string]*stringList{}

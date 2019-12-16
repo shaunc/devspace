@@ -1,20 +1,11 @@
-FROM golang:1.12
+FROM node:8.11.4-alpine
 
-# Create project directory (workdir)
-RUN mkdir -p /go/src/app
-WORKDIR /go/src/app
+RUN mkdir /app
+WORKDIR /app
 
-# Add source code files to WORKDIR
-ADD . .
+COPY package.json .
+RUN npm install
 
-# Install dependencies
-RUN go get ./... 
+COPY . .
 
-# Build application (test if everything works)
-RUN go build -o /tmp/my-app && chmod +x /tmp/my-app
-
-# Install CompileDaemon for hot reloading
-RUN go get github.com/githubnemo/CompileDaemon
-
-# Start CompileDaemon for hot reloading (will watch for file changes and then rebuild & restart the application)
-ENTRYPOINT CompileDaemon -log-prefix=false -color=true -build="go build -o /tmp/my-app" -command="/tmp/my-app"
+CMD ["npm", "start"]
